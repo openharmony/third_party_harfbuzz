@@ -1,0 +1,13 @@
+[
+    {
+        "Name"                  : "harfbuzz",
+        "License"               : "MIT License",
+        "License File"          : "http://pdm.huawei.com/Windchill/navigator/html/ext/huawei/opensource/license/licenseview.html?oid=VR:ext.huawei.huaweipart.HuaweiPart:3829002771",
+        "Version Number"        : "2.6.1",
+        "Owner"                 : "liyujia 00401360",
+        "PDM Number"            : "05810PST",
+        "Upstream URL"          : "https://github.com/harfbuzz/harfbuzz/releases/tag/2.6.1",
+        "Use Application URL"   : "https://harfbuzz.github.io/",
+        "Description"           : "HarfBuzz is a text shaping engine. It primarily supports OpenType, but also Apple Advanced Typography. HarfBuzz is used in Android, Chrome, ChromeOS, Firefox, GNOME, GTK+, KDE, LibreOffice, OpenJDK, PlayStation, Qt, XeTeX, and other places."
+    }
+]
