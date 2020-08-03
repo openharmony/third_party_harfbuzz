@@ -2,7 +2,7 @@
     {
         "Name"                  : "harfbuzz",
         "License"               : "MIT License",
-        "License File"          : "http://pdm.huawei.com/Windchill/navigator/html/ext/huawei/opensource/license/licenseview.html?oid=VR:ext.huawei.huaweipart.HuaweiPart:3829002771",
+        "License File"          : "COPYING",
         "Version Number"        : "2.6.1",
         "Owner"                 : "liyujia 00401360",
         "PDM Number"            : "05810PST",
