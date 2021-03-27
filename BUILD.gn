@@ -1,4 +1,4 @@
-# Copyright (c) 2020 Huawei Device Co., Ltd.
+# Copyright (c) 2020-2021 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -17,7 +17,7 @@ config("harfbuzz_config") {
   include_dirs = [ "//third_party/harfbuzz/src" ]
 }
 
-harfbuzz_sources = [
+harfbuzz_source = [
   "//third_party/harfbuzz/src/hb-aat-layout.cc",
   "//third_party/harfbuzz/src/hb-aat-map.cc",
   "//third_party/harfbuzz/src/hb-blob.cc",
@@ -69,13 +69,13 @@ harfbuzz_sources = [
 if (defined(ohos_lite)) {
   lite_library("harfbuzz") {
     target_type = "shared_library"
-    sources = harfbuzz_sources
+    sources = harfbuzz_source
 
     public_configs = [ ":harfbuzz_config" ]
   }
 } else {
   ohos_static_library("harfbuzz_static") {
-    sources = harfbuzz_sources
+    sources = harfbuzz_source
     include_dirs = [ "src\base" ]
     public_configs = [ ":harfbuzz_config" ]
   }
