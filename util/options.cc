@@ -116,7 +116,7 @@ pre_parse (GOptionContext *context G_GNUC_UNUSED,
 {
   option_group_t *option_group = (option_group_t *) data;
   option_group->pre_parse (error);
-  return *error == nullptr;
+  return !*error;
 }
 
 static gboolean
@@ -127,7 +127,7 @@ post_parse (GOptionContext *context G_GNUC_UNUSED,
 {
   option_group_t *option_group = static_cast<option_group_t *>(data);
   option_group->post_parse (error);
-  return *error == nullptr;
+  return !*error;
 }
 
 void
@@ -152,14 +152,38 @@ option_parser_t::parse (int *argc, char ***argv)
   GError *parse_error = nullptr;
   if (!g_option_context_parse (context, argc, argv, &parse_error))
   {
-    if (parse_error != nullptr) {
+    if (parse_error)
+    {
       fail (true, "%s", parse_error->message);
       //g_error_free (parse_error);
-    } else
+    }
+    else
       fail (true, "Option parse error");
   }
 }
 
+
+static gboolean
+parse_font_extents (const char *name G_GNUC_UNUSED,
+		    const char *arg,
+		    gpointer    data,
+		    GError    **error G_GNUC_UNUSED)
+{
+  view_options_t *view_opts = (view_options_t *) data;
+  view_options_t::font_extents_t &e = view_opts->font_extents;
+  switch (sscanf (arg, "%lf%*[ ,]%lf%*[ ,]%lf", &e.ascent, &e.descent, &e.line_gap)) {
+    case 1: HB_FALLTHROUGH;
+    case 2: HB_FALLTHROUGH;
+    case 3:
+      view_opts->have_font_extents = true;
+      return true;
+    default:
+      g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+		   "%s argument should be one to three space-separated numbers",
+		   name);
+      return false;
+  }
+}
 
 static gboolean
 parse_margin (const char *name G_GNUC_UNUSED,
@@ -196,8 +220,8 @@ parse_shapers (const char *name G_GNUC_UNUSED,
     bool found = false;
     for (const char **hb_shaper = hb_shape_list_shapers (); *hb_shaper; hb_shaper++) {
       if (strcmp (*shaper, *hb_shaper) == 0) {
-        found = true;
-        break;
+	found = true;
+	break;
       }
     }
     if (!found) {
@@ -228,9 +252,9 @@ list_shapers (const char *name G_GNUC_UNUSED,
 
 static gboolean
 parse_features (const char *name G_GNUC_UNUSED,
-	        const char *arg,
-	        gpointer    data,
-	        GError    **error G_GNUC_UNUSED)
+		const char *arg,
+		gpointer    data,
+		GError    **error G_GNUC_UNUSED)
 {
   shape_options_t *shape_opts = (shape_options_t *) data;
   char *s = (char *) arg;
@@ -271,9 +295,9 @@ parse_features (const char *name G_GNUC_UNUSED,
 
 static gboolean
 parse_variations (const char *name G_GNUC_UNUSED,
-	        const char *arg,
-	        gpointer    data,
-	        GError    **error G_GNUC_UNUSED)
+		  const char *arg,
+		  gpointer    data,
+		  GError    **error G_GNUC_UNUSED)
 {
   font_options_t *font_opts = (font_options_t *) data;
   char *s = (char *) arg;
@@ -335,9 +359,9 @@ parse_text (const char *name G_GNUC_UNUSED,
 
 static gboolean
 parse_unicodes (const char *name G_GNUC_UNUSED,
-	        const char *arg,
-	        gpointer    data,
-	        GError    **error G_GNUC_UNUSED)
+		const char *arg,
+		gpointer    data,
+		GError    **error G_GNUC_UNUSED)
 {
   text_options_t *text_opts = (text_options_t *) data;
 
@@ -349,7 +373,7 @@ parse_unicodes (const char *name G_GNUC_UNUSED,
   }
 
   GString *gs = g_string_new (nullptr);
-  if (0 == strcmp (arg, "*")) 
+  if (0 == strcmp (arg, "*"))
   {
     g_string_append_c (gs, '*');
   }
@@ -358,26 +382,26 @@ parse_unicodes (const char *name G_GNUC_UNUSED,
 
     char *s = (char *) arg;
     char *p;
-  
+
     while (s && *s)
     {
       while (*s && strchr (DELIMITERS, *s))
-        s++;
+	s++;
       if (!*s)
-        break;
-  
+	break;
+
       errno = 0;
       hb_codepoint_t u = strtoul (s, &p, 16);
       if (errno || s == p)
       {
-        g_string_free (gs, TRUE);
-        g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
-  		   "Failed parsing Unicode values at: '%s'", s);
-        return false;
+	g_string_free (gs, TRUE);
+	g_set_error (error, G_OPTION_ERROR, G_OPTION_ERROR_BAD_VALUE,
+		     "Failed parsing Unicode values at: '%s'", s);
+	return false;
       }
-  
+
       g_string_append_unichar (gs, u);
-  
+
       s = p;
     }
   }
@@ -397,6 +421,7 @@ view_options_t::add_options (option_parser_t *parser)
     {"background",	0, 0, G_OPTION_ARG_STRING,	&this->back,			"Set background color (default: " DEFAULT_BACK ")",	"rrggbb/rrggbbaa"},
     {"foreground",	0, 0, G_OPTION_ARG_STRING,	&this->fore,			"Set foreground color (default: " DEFAULT_FORE ")",	"rrggbb/rrggbbaa"},
     {"line-space",	0, 0, G_OPTION_ARG_DOUBLE,	&this->line_space,		"Set space between lines (default: 0)",			"units"},
+    {"font-extents",	0, 0, G_OPTION_ARG_CALLBACK,	(gpointer) &parse_font_extents,	"Set font ascent/descent/line-gap (default: auto)","one to three numbers"},
     {"margin",		0, 0, G_OPTION_ARG_CALLBACK,	(gpointer) &parse_margin,	"Margin around output (default: " G_STRINGIFY(DEFAULT_MARGIN) ")","one to four numbers"},
     {nullptr}
   };
@@ -624,7 +649,7 @@ output_options_t::add_options (option_parser_t *parser)
 {
   const char *text;
 
-  if (nullptr == supported_formats)
+  if (!supported_formats)
     text = "Set output serialization format";
   else
   {
@@ -716,7 +741,7 @@ font_options_t::get_font () const
       GString *s = g_string_new (nullptr);
       for (unsigned int i = 0; i < ARRAY_LENGTH (supported_font_funcs); i++)
       {
-        if (i)
+	if (i)
 	  g_string_append_c (s, '/');
 	g_string_append (s, supported_font_funcs[i].name);
       }
@@ -746,7 +771,7 @@ text_options_t::get_line (unsigned int *len)
       line = text;
       line_len = text_len;
     }
-    if (line_len == (unsigned int) -1)
+    if (line_len == UINT_MAX)
       line_len = strlen (line);
 
     if (!line_len) {
@@ -877,55 +902,36 @@ format_options_t::add_options (option_parser_t *parser)
   parser->add_group (entries,
 		     "output-syntax",
 		     "Output syntax:\n"
-         "    text: [<glyph name or index>=<glyph cluster index within input>@<horizontal displacement>,<vertical displacement>+<horizontal advance>,<vertical advance>|...]\n"
-         "    json: [{\"g\": <glyph name or index>, \"ax\": <horizontal advance>, \"ay\": <vertical advance>, \"dx\": <horizontal displacement>, \"dy\": <vertical displacement>, \"cl\": <glyph cluster index within input>}, ...]\n"
-         "\nOutput syntax options:",
+	 "    text: [<glyph name or index>=<glyph cluster index within input>@<horizontal displacement>,<vertical displacement>+<horizontal advance>,<vertical advance>|...]\n"
+	 "    json: [{\"g\": <glyph name or index>, \"ax\": <horizontal advance>, \"ay\": <vertical advance>, \"dx\": <horizontal displacement>, \"dy\": <vertical displacement>, \"cl\": <glyph cluster index within input>}, ...]\n"
+	 "\nOutput syntax options:",
 		     "Options for the syntax of the output",
 		     this);
 }
 
 void
-format_options_t::serialize_unicode (hb_buffer_t *buffer,
-				     GString     *gs)
-{
-  unsigned int num_glyphs = hb_buffer_get_length (buffer);
-  hb_glyph_info_t *info = hb_buffer_get_glyph_infos (buffer, nullptr);
-
-  g_string_append_c (gs, '<');
-  for (unsigned int i = 0; i < num_glyphs; i++)
-  {
-    if (i)
-      g_string_append_c (gs, ',');
-    g_string_append_printf (gs, "U+%04X", info->codepoint);
-    info++;
-  }
-  g_string_append_c (gs, '>');
-}
-
-void
-format_options_t::serialize_glyphs (hb_buffer_t *buffer,
+format_options_t::serialize (hb_buffer_t *buffer,
 				    hb_font_t   *font,
 				    hb_buffer_serialize_format_t output_format,
 				    hb_buffer_serialize_flags_t flags,
 				    GString     *gs)
 {
-  g_string_append_c (gs, '[');
   unsigned int num_glyphs = hb_buffer_get_length (buffer);
   unsigned int start = 0;
 
   while (start < num_glyphs)
   {
-    char buf[1024];
+    char buf[32768];
     unsigned int consumed;
-    start += hb_buffer_serialize_glyphs (buffer, start, num_glyphs,
+    start += hb_buffer_serialize (buffer, start, num_glyphs,
 					 buf, sizeof (buf), &consumed,
 					 font, output_format, flags);
     if (!consumed)
       break;
     g_string_append (gs, buf);
   }
-  g_string_append_c (gs, ']');
 }
+
 void
 format_options_t::serialize_line_no (unsigned int  line_no,
 				     GString      *gs)
@@ -953,7 +959,7 @@ format_options_t::serialize_buffer_of_text (hb_buffer_t  *buffer,
   if (show_unicode)
   {
     serialize_line_no (line_no, gs);
-    serialize_unicode (buffer, gs);
+    serialize (buffer, font, HB_BUFFER_SERIALIZE_FORMAT_TEXT, HB_BUFFER_SERIALIZE_FLAG_DEFAULT, gs);
     g_string_append_c (gs, '\n');
   }
 }
@@ -978,6 +984,6 @@ format_options_t::serialize_buffer_of_glyphs (hb_buffer_t  *buffer,
 					      GString      *gs)
 {
   serialize_line_no (line_no, gs);
-  serialize_glyphs (buffer, font, output_format, format_flags, gs);
+  serialize (buffer, font, output_format, format_flags, gs);
   g_string_append_c (gs, '\n');
 }
