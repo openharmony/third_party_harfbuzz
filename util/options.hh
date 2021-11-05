@@ -125,6 +125,8 @@ struct view_options_t : option_group_t
     fore = nullptr;
     back = nullptr;
     line_space = 0;
+    have_font_extents = false;
+    font_extents.ascent = font_extents.descent = font_extents.line_gap = 0;
     margin.t = margin.r = margin.b = margin.l = DEFAULT_MARGIN;
 
     add_options (parser);
@@ -141,6 +143,10 @@ struct view_options_t : option_group_t
   char *fore;
   char *back;
   double line_space;
+  bool have_font_extents;
+  struct font_extents_t {
+    double ascent, descent, line_gap;
+  } font_extents;
   struct margin_t {
     double t, r, b, l;
   } margin;
@@ -242,7 +248,7 @@ struct shape_options_t : option_group_t
     if (!hb_shape_full (font, buffer, features, num_features, shapers))
     {
       if (error)
-        *error = "all shapers failed.";
+	*error = "all shapers failed.";
       goto fail;
     }
 
@@ -341,7 +347,7 @@ struct shape_options_t : option_group_t
       /* Shape segment corresponding to glyphs start..end. */
       if (end == num_glyphs)
       {
-        if (forward)
+	if (forward)
 	  text_end = num_chars;
 	else
 	  text_start = 0;
@@ -372,9 +378,9 @@ struct shape_options_t : option_group_t
       /* TODO: Add pre/post context text. */
       hb_buffer_flags_t flags = hb_buffer_get_flags (fragment);
       if (0 < text_start)
-        flags = (hb_buffer_flags_t) (flags & ~HB_BUFFER_FLAG_BOT);
+	flags = (hb_buffer_flags_t) (flags & ~HB_BUFFER_FLAG_BOT);
       if (text_end < num_chars)
-        flags = (hb_buffer_flags_t) (flags & ~HB_BUFFER_FLAG_EOT);
+	flags = (hb_buffer_flags_t) (flags & ~HB_BUFFER_FLAG_EOT);
       hb_buffer_set_flags (fragment, flags);
 
       hb_buffer_append (fragment, text_buffer, text_start, text_end);
@@ -517,7 +523,7 @@ struct text_options_t : option_group_t
     fp = nullptr;
     gs = nullptr;
     line = nullptr;
-    line_len = (unsigned int) -1;
+    line_len = UINT_MAX;
 
     add_options (parser);
   }
@@ -629,9 +635,7 @@ struct format_options_t : option_group_t
 
   void add_options (option_parser_t *parser) override;
 
-  void serialize_unicode (hb_buffer_t  *buffer,
-			  GString      *gs);
-  void serialize_glyphs (hb_buffer_t  *buffer,
+  void serialize (hb_buffer_t  *buffer,
 			 hb_font_t    *font,
 			 hb_buffer_serialize_format_t format,
 			 hb_buffer_serialize_flags_t flags,
