@@ -80,7 +80,12 @@ struct hb_vector_t
     fini ();
   }
 
-  void reset () { resize (0); }
+  void reset ()
+  {
+    if (unlikely (in_error ()))
+      allocated = length; // Big hack!
+    resize (0);
+  }
 
   hb_vector_t& operator = (const hb_vector_t &o)
   {
@@ -117,7 +122,7 @@ struct hb_vector_t
   {
     unsigned int i = (unsigned int) i_;
     if (unlikely (i >= length))
-      return Null(Type);
+      return Null (Type);
     return arrayZ[i];
   }
 
@@ -165,13 +170,18 @@ struct hb_vector_t
   Type *push ()
   {
     if (unlikely (!resize (length + 1)))
-      return &Crap(Type);
+      return &Crap (Type);
     return &arrayZ[length - 1];
   }
   template <typename T>
   Type *push (T&& v)
   {
     Type *p = push ();
+    if (p == &Crap (Type))
+      // If push failed to allocate then don't copy v, since this may cause
+      // the created copy to leak memory since we won't have stored a
+      // reference to it.
+      return p;
     *p = hb_forward<T> (v);
     return p;
   }
@@ -181,7 +191,7 @@ struct hb_vector_t
   /* Allocate for size but don't adjust length. */
   bool alloc (unsigned int size)
   {
-    if (unlikely (allocated < 0))
+    if (unlikely (in_error ()))
       return false;
 
     if (likely (size <= (unsigned) allocated))
@@ -195,7 +205,7 @@ struct hb_vector_t
 
     Type *new_array = nullptr;
     bool overflows =
-      (int) new_allocated < 0 ||
+      (int) in_error () ||
       (new_allocated < (unsigned) allocated) ||
       hb_unsigned_mul_overflows (new_allocated, sizeof (Type));
     if (likely (!overflows))
@@ -228,7 +238,7 @@ struct hb_vector_t
 
   Type pop ()
   {
-    if (!length) return Null(Type);
+    if (!length) return Null (Type);
     return hb_move (arrayZ[--length]); /* Does this move actually work? */
   }
 
@@ -277,6 +287,9 @@ struct hb_vector_t
   template <typename T>
   const Type *lsearch (const T &x, const Type *not_found = nullptr) const
   { return as_array ().lsearch (x, not_found); }
+  template <typename T>
+  bool lfind (const T &x, unsigned *pos = nullptr) const
+  { return as_array ().lfind (x, pos); }
 };
 
 template <typename Type>
@@ -290,7 +303,7 @@ struct hb_sorted_vector_t : hb_vector_t<Type>
   typedef hb_sorted_array_t<      Type>       iter_t;
   const_iter_t  iter () const { return as_array (); }
   const_iter_t citer () const { return as_array (); }
-        iter_t  iter ()       { return as_array (); }
+	iter_t  iter ()       { return as_array (); }
   operator       iter_t ()       { return iter (); }
   operator const_iter_t () const { return iter (); }
 
@@ -302,8 +315,8 @@ struct hb_sorted_vector_t : hb_vector_t<Type>
   { return as_array ().bsearch (x, not_found); }
   template <typename T>
   bool bfind (const T &x, unsigned int *i = nullptr,
-		     hb_bfind_not_found_t not_found = HB_BFIND_NOT_FOUND_DONT_STORE,
-		     unsigned int to_store = (unsigned int) -1) const
+	      hb_bfind_not_found_t not_found = HB_BFIND_NOT_FOUND_DONT_STORE,
+	      unsigned int to_store = (unsigned int) -1) const
   { return as_array ().bfind (x, i, not_found, to_store); }
 };
 

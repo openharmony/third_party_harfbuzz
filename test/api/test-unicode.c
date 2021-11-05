@@ -62,8 +62,8 @@ static void free_up (void *p)
 
 static hb_script_t
 simple_get_script (hb_unicode_funcs_t *ufuncs,
-                   hb_codepoint_t      codepoint,
-                   void               *user_data)
+		   hb_codepoint_t      codepoint,
+		   void               *user_data)
 {
   data_t *data = (data_t *) user_data;
 
@@ -79,8 +79,8 @@ simple_get_script (hb_unicode_funcs_t *ufuncs,
 
 static hb_script_t
 a_is_for_arabic_get_script (hb_unicode_funcs_t *ufuncs,
-                            hb_codepoint_t      codepoint,
-                            void               *user_data)
+			    hb_codepoint_t      codepoint,
+			    void               *user_data)
 {
   data_t *data = (data_t *) user_data;
 
@@ -178,6 +178,9 @@ static const test_pair_t combining_class_tests_more[] =
   /* Unicode-12.0 character additions */
   {   0x0EBA,   9 },
 
+  /* Unicode-13.0 character additions */
+  {   0x1ABF, 220 },
+
   { 0x111111, 0 }
 };
 
@@ -254,6 +257,9 @@ static const test_pair_t general_category_tests_more[] =
 
   /* Unicode-12.1 character additions */
   {   0x32FF, HB_UNICODE_GENERAL_CATEGORY_OTHER_SYMBOL },
+
+  /* Unicode-13.0 character additions */
+  {   0x08BE, HB_UNICODE_GENERAL_CATEGORY_OTHER_LETTER },
 
   { 0x111111, HB_UNICODE_GENERAL_CATEGORY_UNASSIGNED }
 };
@@ -499,6 +505,12 @@ static const test_pair_t script_tests_more[] =
   /* Unicode-12.1 additions */
   {   0x32FF, HB_SCRIPT_COMMON },
 
+  /* Unicode-13.0 additions */
+  {   0x10E80, HB_SCRIPT_YEZIDI },
+  {   0x10FB0, HB_SCRIPT_CHORASMIAN },
+  {   0x11900, HB_SCRIPT_DIVES_AKURU },
+  {   0x18B00, HB_SCRIPT_KHITAN_SMALL_SCRIPT },
+
   { 0x111111, HB_SCRIPT_UNKNOWN }
 };
 
@@ -537,6 +549,8 @@ typedef struct {
     G_N_ELEMENTS (name##_tests_more), \
     DEFAULT \
   }
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wcast-function-type"
 static const property_t properties[] =
 {
   PROPERTY (combining_class, 0),
@@ -544,6 +558,7 @@ static const property_t properties[] =
   PROPERTY (mirroring, RETURNS_UNICODE_ITSELF),
   PROPERTY (script, (unsigned int) HB_SCRIPT_UNKNOWN)
 };
+#pragma GCC diagnostic pop
 #undef PROPERTY
 
 static void
@@ -751,7 +766,7 @@ test_unicode_subclassing_nil (data_fixture_t *f, gconstpointer user_data HB_UNUS
   hb_unicode_funcs_destroy (uf);
 
   hb_unicode_funcs_set_script_func (aa, a_is_for_arabic_get_script,
-                                    &f->data[1], free_up);
+				    &f->data[1], free_up);
 
   g_assert_cmphex (hb_unicode_script (aa, 'a'), ==, HB_SCRIPT_ARABIC);
   g_assert_cmphex (hb_unicode_script (aa, 'b'), ==, HB_SCRIPT_UNKNOWN);
@@ -770,7 +785,7 @@ test_unicode_subclassing_default (data_fixture_t *f, gconstpointer user_data HB_
   aa = hb_unicode_funcs_create (uf);
 
   hb_unicode_funcs_set_script_func (aa, a_is_for_arabic_get_script,
-                                    &f->data[1], free_up);
+				    &f->data[1], free_up);
 
   g_assert_cmphex (hb_unicode_script (aa, 'a'), ==, HB_SCRIPT_ARABIC);
   g_assert_cmphex (hb_unicode_script (aa, 'b'), ==, HB_SCRIPT_LATIN);
@@ -788,7 +803,7 @@ test_unicode_subclassing_deep (data_fixture_t *f, gconstpointer user_data HB_UNU
   uf = hb_unicode_funcs_create (NULL);
 
   hb_unicode_funcs_set_script_func (uf, simple_get_script,
-                                    &f->data[0], free_up);
+				    &f->data[0], free_up);
 
   aa = hb_unicode_funcs_create (uf);
 
@@ -798,7 +813,7 @@ test_unicode_subclassing_deep (data_fixture_t *f, gconstpointer user_data HB_UNU
   g_assert (!f->data[0].freed);
 
   hb_unicode_funcs_set_script_func (aa, a_is_for_arabic_get_script,
-                                    &f->data[1], free_up);
+				    &f->data[1], free_up);
 
   g_assert_cmphex (hb_unicode_script (aa, 'a'), ==, HB_SCRIPT_ARABIC);
   g_assert_cmphex (hb_unicode_script (aa, 'b'), ==, HB_SCRIPT_LATIN);
