@@ -73,7 +73,7 @@
  * === The sanitize() contract ===
  *
  * The sanitize() method of each object type shall return true if it's safe to
- * call other methods of the object, and false otherwise.
+ * call other methods of the object, and %false otherwise.
  *
  * Note that what sanitize() checks for might align with what the specification
  * describes as valid table data, but does not have to be.  In particular, we
@@ -105,7 +105,7 @@
 #define HB_SANITIZE_MAX_EDITS 32
 #endif
 #ifndef HB_SANITIZE_MAX_OPS_FACTOR
-#define HB_SANITIZE_MAX_OPS_FACTOR 8
+#define HB_SANITIZE_MAX_OPS_FACTOR 64
 #endif
 #ifndef HB_SANITIZE_MAX_OPS_MIN
 #define HB_SANITIZE_MAX_OPS_MIN 16384
@@ -113,14 +113,16 @@
 #ifndef HB_SANITIZE_MAX_OPS_MAX
 #define HB_SANITIZE_MAX_OPS_MAX 0x3FFFFFFF
 #endif
+#ifndef HB_SANITIZE_MAX_SUBTABLES
+#define HB_SANITIZE_MAX_SUBTABLES 0x4000
+#endif
 
 struct hb_sanitize_context_t :
        hb_dispatch_context_t<hb_sanitize_context_t, bool, HB_DEBUG_SANITIZE>
 {
   hb_sanitize_context_t () :
-	debug_depth (0),
 	start (nullptr), end (nullptr),
-	max_ops (0),
+	max_ops (0), max_subtables (0),
 	writable (false), edit_count (0),
 	blob (nullptr),
 	num_glyphs (65536),
@@ -133,6 +135,12 @@ struct hb_sanitize_context_t :
   static return_t default_return_value () { return true; }
   static return_t no_dispatch_return_value () { return false; }
   bool stop_sublookup_iteration (const return_t r) const { return !r; }
+
+  bool visit_subtables (unsigned count)
+  {
+    max_subtables += count;
+    return max_subtables < HB_SANITIZE_MAX_SUBTABLES;
+  }
 
   private:
   template <typename T, typename ...Ts> auto
@@ -189,8 +197,12 @@ struct hb_sanitize_context_t :
   void start_processing ()
   {
     reset_object ();
-    this->max_ops = hb_max ((unsigned int) (this->end - this->start) * HB_SANITIZE_MAX_OPS_FACTOR,
-			 (unsigned) HB_SANITIZE_MAX_OPS_MIN);
+    if (unlikely (hb_unsigned_mul_overflows (this->end - this->start, HB_SANITIZE_MAX_OPS_FACTOR)))
+      this->max_ops = HB_SANITIZE_MAX_OPS_MAX;
+    else
+      this->max_ops = hb_clamp ((unsigned) (this->end - this->start) * HB_SANITIZE_MAX_OPS_FACTOR,
+				(unsigned) HB_SANITIZE_MAX_OPS_MIN,
+				(unsigned) HB_SANITIZE_MAX_OPS_MAX);
     this->edit_count = 0;
     this->debug_depth = 0;
 
@@ -221,7 +233,7 @@ struct hb_sanitize_context_t :
 	      (this->start <= p &&
 	       p <= this->end &&
 	       (unsigned int) (this->end - p) >= len &&
-	       this->max_ops-- > 0);
+	       (this->max_ops -= len) > 0);
 
     DEBUG_MSG_LEVEL (SANITIZE, p, this->debug_depth+1, 0,
 		     "check_range [%p..%p]"
@@ -326,8 +338,8 @@ struct hb_sanitize_context_t :
       {
 	DEBUG_MSG_FUNC (SANITIZE, start, "passed first round with %d edits; going for second round", edit_count);
 
-        /* sanitize again to ensure no toe-stepping */
-        edit_count = 0;
+	/* sanitize again to ensure no toe-stepping */
+	edit_count = 0;
 	sane = t->sanitize (this);
 	if (edit_count) {
 	  DEBUG_MSG_FUNC (SANITIZE, start, "requested %d edits in second round; FAILLING", edit_count);
@@ -338,7 +350,7 @@ struct hb_sanitize_context_t :
     else
     {
       if (edit_count && !writable) {
-        start = hb_blob_get_data_writable (blob, nullptr);
+	start = hb_blob_get_data_writable (blob, nullptr);
 	end = start + blob->length;
 
 	if (start)
@@ -374,9 +386,8 @@ struct hb_sanitize_context_t :
     return sanitize_blob<Type> (hb_face_reference_table (face, tableTag));
   }
 
-  mutable unsigned int debug_depth;
   const char *start, *end;
-  mutable int max_ops;
+  mutable int max_ops, max_subtables;
   private:
   bool writable;
   unsigned int edit_count;
