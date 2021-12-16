@@ -125,7 +125,7 @@ struct VORG
   FixedVersion<>version;	/* Version of VORG table. Set to 0x00010000u. */
   FWORD		defaultVertOriginY;
 				/* The default vertical origin. */
-  SortedArray16Of<VertOriginMetric>
+  SortedArrayOf<VertOriginMetric>
 		vertYOrigins;	/* The array of vertical origins. */
 
   public:

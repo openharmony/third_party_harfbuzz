@@ -29,6 +29,8 @@
 #include "hb.h"
 #include "hb-ot.h"
 
+#include <stdio.h>
+
 #ifdef HAVE_FREETYPE
 #include "hb-ft.h"
 #endif
