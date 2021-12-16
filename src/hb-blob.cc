@@ -35,6 +35,9 @@
 #include <sys/mman.h>
 #endif /* HAVE_SYS_MMAN_H */
 
+#include <stdio.h>
+#include <stdlib.h>
+
 
 /**
  * SECTION: hb-blob
@@ -55,7 +58,7 @@
  * @length: Length of @data in bytes.
  * @mode: Memory mode for @data.
  * @user_data: Data parameter to pass to @destroy.
- * @destroy: (nullable): Callback to call when @data is not needed anymore.
+ * @destroy: Callback to call when @data is not needed anymore.
  *
  * Creates a new "blob" object wrapping @data.  The @mode parameter is used
  * to negotiate ownership and lifecycle of @data.
@@ -113,7 +116,7 @@ _hb_blob_destroy (void *data)
  * @length: Length of sub-blob.
  *
  * Returns a blob that represents a range of bytes in @parent.  The new
- * blob is always created with #HB_MEMORY_MODE_READONLY, meaning that it
+ * blob is always created with %HB_MEMORY_MODE_READONLY, meaning that it
  * will never modify data in the parent blob.  The parent data is not
  * expected to be modified, and will result in undefined behavior if it
  * is.
@@ -153,7 +156,7 @@ hb_blob_create_sub_blob (hb_blob_t    *parent,
  *
  * Makes a writable copy of @blob.
  *
- * Return value: The new blob, or nullptr if allocation failed
+ * Return value: New blob, or nullptr if allocation failed.
  *
  * Since: 1.8.0
  **/
@@ -179,7 +182,7 @@ hb_blob_copy_writable_or_fail (hb_blob_t *blob)
  *
  * See TODO:link object types for more information.
  *
- * Return value: (transfer full): The empty blob.
+ * Return value: (transfer full): the empty blob.
  *
  * Since: 0.9.2
  **/
@@ -231,15 +234,13 @@ hb_blob_destroy (hb_blob_t *blob)
 
 /**
  * hb_blob_set_user_data: (skip)
- * @blob: An #hb_blob_t
- * @key: The user-data key to set
- * @data: A pointer to the user data to set
- * @destroy: (nullable): A callback to call when @data is not needed anymore
- * @replace: Whether to replace an existing data with the same key
+ * @blob: a blob.
+ * @key: key for data to set.
+ * @data: data to set.
+ * @destroy: callback to call when @data is not needed anymore.
+ * @replace: whether to replace an existing data with the same key.
  *
- * Attaches a user-data key/data pair to the specified blob.
- *
- * Return value: %true if success, %false otherwise
+ * Return value:
  *
  * Since: 0.9.2
  **/
@@ -255,13 +256,12 @@ hb_blob_set_user_data (hb_blob_t          *blob,
 
 /**
  * hb_blob_get_user_data: (skip)
- * @blob: a blob
- * @key: The user-data key to query
+ * @blob: a blob.
+ * @key: key for data to get.
  *
- * Fetches the user data associated with the specified key,
- * attached to the specified font-functions structure.
  *
- * Return value: (transfer none): A pointer to the user data
+ *
+ * Return value: (transfer none):
  *
  * Since: 0.9.2
  **/
@@ -275,9 +275,9 @@ hb_blob_get_user_data (hb_blob_t          *blob,
 
 /**
  * hb_blob_make_immutable:
- * @blob: a blob
+ * @blob: a blob.
  *
- * Makes a blob immutable.
+ *
  *
  * Since: 0.9.2
  **/
@@ -294,9 +294,9 @@ hb_blob_make_immutable (hb_blob_t *blob)
  * hb_blob_is_immutable:
  * @blob: a blob.
  *
- * Tests whether a blob is immutable.
  *
- * Return value: %true if @blob is immutable, %false otherwise
+ *
+ * Return value: TODO
  *
  * Since: 0.9.2
  **/
@@ -311,9 +311,9 @@ hb_blob_is_immutable (hb_blob_t *blob)
  * hb_blob_get_length:
  * @blob: a blob.
  *
- * Fetches the length of a blob's data.
  *
- * Return value: the length of @blob data in bytes.
+ *
+ * Return value: the length of blob data in bytes.
  *
  * Since: 0.9.2
  **/
@@ -326,11 +326,11 @@ hb_blob_get_length (hb_blob_t *blob)
 /**
  * hb_blob_get_data:
  * @blob: a blob.
- * @length: (out): The length in bytes of the data retrieved
+ * @length: (out):
  *
- * Fetches the data from a blob.
  *
- * Returns: (transfer none) (array length=length): the byte data of @blob.
+ *
+ * Returns: (transfer none) (array length=length):
  *
  * Since: 0.9.2
  **/
@@ -362,14 +362,16 @@ hb_blob_get_data (hb_blob_t *blob, unsigned int *length)
 char *
 hb_blob_get_data_writable (hb_blob_t *blob, unsigned int *length)
 {
-  if (hb_object_is_immutable (blob) ||
-     !blob->try_make_writable ())
-  {
-    if (length) *length = 0;
+  if (!blob->try_make_writable ()) {
+    if (length)
+      *length = 0;
+
     return nullptr;
   }
 
-  if (length) *length = blob->length;
+  if (length)
+    *length = blob->length;
+
   return const_cast<char *> (blob->data);
 }
 
@@ -435,8 +437,8 @@ hb_blob_t::try_make_writable_inplace ()
 bool
 hb_blob_t::try_make_writable ()
 {
-  if (unlikely (!length))
-    mode = HB_MEMORY_MODE_WRITABLE;
+  if (hb_object_is_immutable (this))
+    return false;
 
   if (this->mode == HB_MEMORY_MODE_WRITABLE)
     return true;
@@ -556,12 +558,9 @@ _open_resource_fork (const char *file_name, hb_mapped_file_t *file)
 
 /**
  * hb_blob_create_from_file:
- * @file_name: A font filename
+ * @file_name: font filename.
  *
- * Creates a new blob containing the data from the
- * specified binary font file.
- *
- * Returns: An #hb_blob_t pointer with the content of the file
+ * Returns: A hb_blob_t pointer with the content of the file
  *
  * Since: 1.7.7
  **/
