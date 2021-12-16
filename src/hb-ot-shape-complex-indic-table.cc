@@ -82,7 +82,7 @@
 #define _(S,M) INDIC_COMBINE_CATEGORIES (ISC_##S, IMC_##M)
 
 
-static const uint16_t indic_table[] = {
+static const INDIC_TABLE_ELEMENT_TYPE indic_table[] = {
 
 
 #define indic_offset_0x0028u 0
@@ -404,7 +404,7 @@ static const uint16_t indic_table[] = {
 
 }; /* Table items: 1792; occupancy: 70% */
 
-uint16_t
+INDIC_TABLE_ELEMENT_TYPE
 hb_indic_get_categories (hb_codepoint_t u)
 {
   switch (u >> 12)

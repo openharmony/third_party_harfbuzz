@@ -25,7 +25,6 @@ AM_CPPFLAGS = \
 	$(GLIB_CFLAGS) \
 	$(FREETYPE_CFLAGS) \
 	$(CAIRO_FT_CFLAGS) \
-	$(CHAFA_CFLAGS) \
 	$(NULL)
 LDADD = \
 	$(top_builddir)/src/libharfbuzz.la \
@@ -43,7 +42,6 @@ hb_view_LDADD = \
 	$(LDADD) \
 	$(CAIRO_LIBS) \
 	$(CAIRO_FT_LIBS) \
-	$(CHAFA_LIBS) \
 	$(NULL)
 bin_PROGRAMS += hb-view
 endif # HAVE_CAIRO_FT
