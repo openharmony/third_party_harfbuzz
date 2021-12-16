@@ -80,12 +80,7 @@ struct hb_vector_t
     fini ();
   }
 
-  void reset ()
-  {
-    if (unlikely (in_error ()))
-      allocated = length; // Big hack!
-    resize (0);
-  }
+  void reset () { resize (0); }
 
   hb_vector_t& operator = (const hb_vector_t &o)
   {
@@ -177,11 +172,6 @@ struct hb_vector_t
   Type *push (T&& v)
   {
     Type *p = push ();
-    if (p == &Crap (Type))
-      // If push failed to allocate then don't copy v, since this may cause
-      // the created copy to leak memory since we won't have stored a
-      // reference to it.
-      return p;
     *p = hb_forward<T> (v);
     return p;
   }
@@ -191,7 +181,7 @@ struct hb_vector_t
   /* Allocate for size but don't adjust length. */
   bool alloc (unsigned int size)
   {
-    if (unlikely (in_error ()))
+    if (unlikely (allocated < 0))
       return false;
 
     if (likely (size <= (unsigned) allocated))
@@ -205,7 +195,7 @@ struct hb_vector_t
 
     Type *new_array = nullptr;
     bool overflows =
-      (int) in_error () ||
+      (int) new_allocated < 0 ||
       (new_allocated < (unsigned) allocated) ||
       hb_unsigned_mul_overflows (new_allocated, sizeof (Type));
     if (likely (!overflows))

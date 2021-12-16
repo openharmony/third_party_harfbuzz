@@ -455,8 +455,8 @@ struct IndexSubtableRecord
     unsigned int old_cbdt_prime_length = bitmap_size_context->cbdt_prime->length;
 
     // Set to invalid state to indicate filling glyphs is not yet started.
-    if (unlikely (!c->serializer->check_success (records->resize (records->length + 1))))
-      return_trace (false);
+    if (unlikely (!records->resize (records->length + 1)))
+      return_trace (c->serializer->check_success (false));
 
     (*records)[records->length - 1].firstGlyphIndex = 1;
     (*records)[records->length - 1].lastGlyphIndex = 0;
@@ -510,7 +510,7 @@ struct IndexSubtableRecord
 
   HBGlyphID			firstGlyphIndex;
   HBGlyphID			lastGlyphIndex;
-  Offset32To<IndexSubtable>	offsetToSubtable;
+  LOffsetTo<IndexSubtable>	offsetToSubtable;
   public:
   DEFINE_SIZE_STATIC (8);
 };
@@ -567,8 +567,8 @@ struct IndexSubtableArray
 
     hb_vector_t<hb_pair_t<hb_codepoint_t, const IndexSubtableRecord*>> lookup;
     build_lookup (c, bitmap_size_context, &lookup);
-    if (unlikely (!c->serializer->propagate_error (lookup)))
-      return false;
+    if (unlikely (lookup.in_error ()))
+      return c->serializer->check_success (false);
 
     bitmap_size_context->size = 0;
     bitmap_size_context->num_tables = 0;
@@ -672,7 +672,7 @@ struct BitmapSizeTable
   }
 
   protected:
-  NNOffset32To<IndexSubtableArray>
+  LNNOffsetTo<IndexSubtableArray>
 			indexSubtableArrayOffset;
   HBUINT32		indexTablesSize;
   HBUINT32		numberOfIndexSubtables;
@@ -697,7 +697,7 @@ struct BitmapSizeTable
 struct GlyphBitmapDataFormat17
 {
   SmallGlyphMetrics	glyphMetrics;
-  Array32Of<HBUINT8>	data;
+  LArrayOf<HBUINT8>	data;
   public:
   DEFINE_SIZE_ARRAY (9, data);
 };
@@ -705,14 +705,14 @@ struct GlyphBitmapDataFormat17
 struct GlyphBitmapDataFormat18
 {
   BigGlyphMetrics	glyphMetrics;
-  Array32Of<HBUINT8>	data;
+  LArrayOf<HBUINT8>	data;
   public:
   DEFINE_SIZE_ARRAY (12, data);
 };
 
 struct GlyphBitmapDataFormat19
 {
-  Array32Of<HBUINT8>	data;
+  LArrayOf<HBUINT8>	data;
   public:
   DEFINE_SIZE_ARRAY (4, data);
 };
@@ -798,7 +798,7 @@ struct CBLC
 
   protected:
   FixedVersion<>		version;
-  Array32Of<BitmapSizeTable>	sizeTables;
+  LArrayOf<BitmapSizeTable>	sizeTables;
   public:
   DEFINE_SIZE_ARRAY (8, sizeTables);
 };
