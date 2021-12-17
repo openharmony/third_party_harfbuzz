@@ -549,8 +549,6 @@ typedef struct {
     G_N_ELEMENTS (name##_tests_more), \
     DEFAULT \
   }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wcast-function-type"
 static const property_t properties[] =
 {
   PROPERTY (combining_class, 0),
@@ -558,7 +556,6 @@ static const property_t properties[] =
   PROPERTY (mirroring, RETURNS_UNICODE_ITSELF),
   PROPERTY (script, (unsigned int) HB_SCRIPT_UNKNOWN)
 };
-#pragma GCC diagnostic pop
 #undef PROPERTY
 
 static void

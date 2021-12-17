@@ -304,7 +304,7 @@ struct ContextualSubtable
     bool mark_set;
     unsigned int mark;
     const ContextualSubtable *table;
-    const UnsizedListOfOffset16To<Lookup<HBGlyphID>, HBUINT, false> &subs;
+    const UnsizedOffsetListOf<Lookup<HBGlyphID>, HBUINT, false> &subs;
   };
 
   bool apply (hb_aat_apply_context_t *c) const
@@ -337,9 +337,9 @@ struct ContextualSubtable
       const EntryData &data = entries[i].data;
 
       if (data.markIndex != 0xFFFF)
-	num_lookups = hb_max (num_lookups, 1u + data.markIndex);
+	num_lookups = hb_max (num_lookups, 1 + data.markIndex);
       if (data.currentIndex != 0xFFFF)
-	num_lookups = hb_max (num_lookups, 1u + data.currentIndex);
+	num_lookups = hb_max (num_lookups, 1 + data.currentIndex);
     }
 
     return_trace (substitutionTables.sanitize (c, this, num_lookups));
@@ -348,7 +348,7 @@ struct ContextualSubtable
   protected:
   StateTable<Types, EntryData>
 		machine;
-  NNOffsetTo<UnsizedListOfOffset16To<Lookup<HBGlyphID>, HBUINT, false>, HBUINT>
+  NNOffsetTo<UnsizedOffsetListOf<Lookup<HBGlyphID>, HBUINT, false>, HBUINT>
 		substitutionTables;
   public:
   DEFINE_SIZE_STATIC (20);
@@ -499,7 +499,7 @@ struct LigatureSubtable
 	  }
 
 	  DEBUG_MSG (APPLY, nullptr, "Moving to stack position %u", cursor - 1);
-	  if (unlikely (!buffer->move_to (match_positions[--cursor % ARRAY_LENGTH (match_positions)]))) return;
+	  buffer->move_to (match_positions[--cursor % ARRAY_LENGTH (match_positions)]);
 
 	  if (unlikely (!actionData->sanitize (&c->sanitizer))) break;
 	  action = *actionData;
@@ -525,25 +525,25 @@ struct LigatureSubtable
 	    hb_codepoint_t lig = ligatureData;
 
 	    DEBUG_MSG (APPLY, nullptr, "Produced ligature %u", lig);
-	    if (unlikely (!buffer->replace_glyph (lig))) return;
+	    buffer->replace_glyph (lig);
 
 	    unsigned int lig_end = match_positions[(match_length - 1u) % ARRAY_LENGTH (match_positions)] + 1u;
 	    /* Now go and delete all subsequent components. */
 	    while (match_length - 1u > cursor)
 	    {
 	      DEBUG_MSG (APPLY, nullptr, "Skipping ligature component");
-	      if (unlikely (!buffer->move_to (match_positions[--match_length % ARRAY_LENGTH (match_positions)]))) return;
-	      if (unlikely (!buffer->replace_glyph (DELETED_GLYPH))) return;
+	      buffer->move_to (match_positions[--match_length % ARRAY_LENGTH (match_positions)]);
+	      buffer->replace_glyph (DELETED_GLYPH);
 	    }
 
-	    if (unlikely (!buffer->move_to (lig_end))) return;
+	    buffer->move_to (lig_end);
 	    buffer->merge_out_clusters (match_positions[cursor % ARRAY_LENGTH (match_positions)], buffer->out_len);
 	  }
 
 	  actionData++;
 	}
 	while (!(action & LigActionLast));
-	if (unlikely (!buffer->move_to (end))) return;
+	buffer->move_to (end);
       }
     }
 
@@ -733,16 +733,17 @@ struct InsertionSubtable
 	bool before = flags & MarkedInsertBefore;
 
 	unsigned int end = buffer->out_len;
-	if (unlikely (!buffer->move_to (mark))) return;
+	buffer->move_to (mark);
 
 	if (buffer->idx < buffer->len && !before)
-	  if (unlikely (!buffer->copy_glyph ())) return;
+	  buffer->copy_glyph ();
 	/* TODO We ignore KashidaLike setting. */
-	if (unlikely (!buffer->replace_glyphs (0, count, glyphs))) return;
+	for (unsigned int i = 0; i < count; i++)
+	  buffer->output_glyph (glyphs[i]);
 	if (buffer->idx < buffer->len && !before)
 	  buffer->skip_glyph ();
 
-	if (unlikely (!buffer->move_to (end + count))) return;
+	buffer->move_to (end + count);
 
 	buffer->unsafe_to_break_from_outbuffer (mark, hb_min (buffer->idx + 1, buffer->len));
       }
@@ -763,9 +764,10 @@ struct InsertionSubtable
 	unsigned int end = buffer->out_len;
 
 	if (buffer->idx < buffer->len && !before)
-	  if (unlikely (!buffer->copy_glyph ())) return;
+	  buffer->copy_glyph ();
 	/* TODO We ignore KashidaLike setting. */
-	if (unlikely (!buffer->replace_glyphs (0, count, glyphs))) return;
+	for (unsigned int i = 0; i < count; i++)
+	  buffer->output_glyph (glyphs[i]);
 	if (buffer->idx < buffer->len && !before)
 	  buffer->skip_glyph ();
 
@@ -784,7 +786,7 @@ struct InsertionSubtable
 	 *
 	 * https://github.com/harfbuzz/harfbuzz/issues/1224#issuecomment-427691417
 	 */
-	if (unlikely (!buffer->move_to ((flags & DontAdvance) ? end : end + count))) return;
+	buffer->move_to ((flags & DontAdvance) ? end : end + count);
       }
     }
 

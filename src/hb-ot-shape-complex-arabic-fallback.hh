@@ -208,11 +208,11 @@ struct ManifestLookup
 {
   public:
   OT::Tag tag;
-  OT::Offset16To<OT::SubstLookup> lookupOffset;
+  OT::OffsetTo<OT::SubstLookup> lookupOffset;
   public:
   DEFINE_SIZE_STATIC (6);
 };
-typedef OT::Array16Of<ManifestLookup> Manifest;
+typedef OT::ArrayOf<ManifestLookup> Manifest;
 
 static bool
 arabic_fallback_plan_init_win1256 (arabic_fallback_plan_t *fallback_plan HB_UNUSED,
