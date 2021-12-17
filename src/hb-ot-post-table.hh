@@ -56,7 +56,7 @@ struct postV2Tail
   }
 
   protected:
-  Array16Of<HBUINT16>	glyphNameIndex;	/* This is not an offset, but is the
+  ArrayOf<HBUINT16>	glyphNameIndex;	/* This is not an offset, but is the
 					 * ordinal number of the glyph in 'post'
 					 * string tables. */
 /*UnsizedArrayOf<HBUINT8>
@@ -87,6 +87,7 @@ struct post
     if (unlikely (!post_prime)) return_trace (false);
 
     serialize (c->serializer);
+    if (c->serializer->in_error () || c->serializer->ran_out_of_room) return_trace (false);
 
     return_trace (true);
   }
@@ -236,7 +237,7 @@ struct post
 
     private:
     uint32_t version;
-    const Array16Of<HBUINT16> *glyphNameIndex;
+    const ArrayOf<HBUINT16> *glyphNameIndex;
     hb_vector_t<uint32_t> index_to_offset;
     const uint8_t *pool;
     hb_atomic_ptr_t<uint16_t *> gids_sorted_by_name;

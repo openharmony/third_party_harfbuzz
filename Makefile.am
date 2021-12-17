@@ -20,6 +20,7 @@ EXTRA_DIST = \
 	meson.build \
 	meson_options.txt \
 	subprojects/expat.wrap \
+	subprojects/fontconfig.wrap \
 	subprojects/freetype2.wrap \
 	subprojects/glib.wrap \
 	subprojects/libffi.wrap \
@@ -39,7 +40,8 @@ EXTRA_DIST = \
 	perf/texts/en-words.txt \
 	perf/texts/fa-monologue.txt \
 	perf/texts/fa-thelittleprince.txt \
-	mingw-configure.sh \
+	meson-cc-tests/intel-atomic-primitives-test.c \
+	meson-cc-tests/solaris-atomic-operations.c \
 	$(NULL)
 
 MAINTAINERCLEANFILES = \

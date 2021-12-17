@@ -42,7 +42,7 @@ namespace OT {
  */
 
 /* Array of contour point indices--in increasing numerical order */
-struct AttachPoint : Array16Of<HBUINT16>
+struct AttachPoint : ArrayOf<HBUINT16>
 {
   bool subset (hb_subset_context_t *c) const
   {
@@ -110,10 +110,10 @@ struct AttachList
   }
 
   protected:
-  Offset16To<Coverage>
+  OffsetTo<Coverage>
 		coverage;		/* Offset to Coverage table -- from
 					 * beginning of AttachList table */
-  Array16OfOffset16To<AttachPoint>
+  OffsetArrayOf<AttachPoint>
 		attachPoint;		/* Array of AttachPoint tables
 					 * in Coverage Index order */
   public:
@@ -220,7 +220,7 @@ struct CaretValueFormat3
   protected:
   HBUINT16	caretValueFormat;	/* Format identifier--format = 3 */
   FWORD		coordinate;		/* X or Y value, in design units */
-  Offset16To<Device>
+  OffsetTo<Device>
 		deviceTable;		/* Offset to Device table for X or Y
 					 * value--from beginning of CaretValue
 					 * table */
@@ -329,7 +329,7 @@ struct LigGlyph
 
   void collect_variation_indices (hb_collect_variation_indices_context_t *c) const
   {
-    for (const Offset16To<CaretValue>& offset : carets.iter ())
+    for (const OffsetTo<CaretValue>& offset : carets.iter ())
       (this+offset).collect_variation_indices (c->layout_variation_indices);
   }
 
@@ -340,7 +340,7 @@ struct LigGlyph
   }
 
   protected:
-  Array16OfOffset16To<CaretValue>
+  OffsetArrayOf<CaretValue>
 		carets;			/* Offset array of CaretValue tables
 					 * --from beginning of LigGlyph table
 					 * --in increasing coordinate order */
@@ -408,10 +408,10 @@ struct LigCaretList
   }
 
   protected:
-  Offset16To<Coverage>
+  OffsetTo<Coverage>
 		coverage;		/* Offset to Coverage table--from
 					 * beginning of LigCaretList table */
-  Array16OfOffset16To<LigGlyph>
+  OffsetArrayOf<LigGlyph>
 		ligGlyph;		/* Array of LigGlyph tables
 					 * in Coverage Index order */
   public:
@@ -432,7 +432,7 @@ struct MarkGlyphSetsFormat1
     out->format = format;
 
     bool ret = true;
-    for (const Offset32To<Coverage>& offset : coverage.iter ())
+    for (const LOffsetTo<Coverage>& offset : coverage.iter ())
     {
       auto *o = out->coverage.serialize_append (c->serializer);
       if (unlikely (!o))
@@ -460,7 +460,7 @@ struct MarkGlyphSetsFormat1
 
   protected:
   HBUINT16	format;			/* Format identifier--format = 1 */
-  Array16Of<Offset32To<Coverage>>
+  ArrayOf<LOffsetTo<Coverage>>
 		coverage;		/* Array of long offsets to mark set
 					 * coverage tables */
   public:
@@ -643,10 +643,10 @@ struct GDEF
     auto *out = c->serializer->embed (*this);
     if (unlikely (!out)) return_trace (false);
 
-    bool subset_glyphclassdef = out->glyphClassDef.serialize_subset (c, glyphClassDef, this, nullptr, false, true);
+    bool subset_glyphclassdef = out->glyphClassDef.serialize_subset (c, glyphClassDef, this);
     bool subset_attachlist = out->attachList.serialize_subset (c, attachList, this);
     bool subset_ligcaretlist = out->ligCaretList.serialize_subset (c, ligCaretList, this);
-    bool subset_markattachclassdef = out->markAttachClassDef.serialize_subset (c, markAttachClassDef, this, nullptr, false, true);
+    bool subset_markattachclassdef = out->markAttachClassDef.serialize_subset (c, markAttachClassDef, this);
 
     bool subset_markglyphsetsdef = true;
     if (version.to_int () >= 0x00010002u)
@@ -687,28 +687,28 @@ struct GDEF
   protected:
   FixedVersion<>version;		/* Version of the GDEF table--currently
 					 * 0x00010003u */
-  Offset16To<ClassDef>
+  OffsetTo<ClassDef>
 		glyphClassDef;		/* Offset to class definition table
 					 * for glyph type--from beginning of
 					 * GDEF header (may be Null) */
-  Offset16To<AttachList>
+  OffsetTo<AttachList>
 		attachList;		/* Offset to list of glyphs with
 					 * attachment points--from beginning
 					 * of GDEF header (may be Null) */
-  Offset16To<LigCaretList>
+  OffsetTo<LigCaretList>
 		ligCaretList;		/* Offset to list of positioning points
 					 * for ligature carets--from beginning
 					 * of GDEF header (may be Null) */
-  Offset16To<ClassDef>
+  OffsetTo<ClassDef>
 		markAttachClassDef;	/* Offset to class definition table for
 					 * mark attachment type--from beginning
 					 * of GDEF header (may be Null) */
-  Offset16To<MarkGlyphSets>
+  OffsetTo<MarkGlyphSets>
 		markGlyphSetsDef;	/* Offset to the table of mark set
 					 * definitions--from beginning of GDEF
 					 * header (may be NULL).  Introduced
 					 * in version 0x00010002. */
-  Offset32To<VariationStore>
+  LOffsetTo<VariationStore>
 		varStore;		/* Offset to the table of Item Variation
 					 * Store--from beginning of GDEF
 					 * header (may be NULL).  Introduced

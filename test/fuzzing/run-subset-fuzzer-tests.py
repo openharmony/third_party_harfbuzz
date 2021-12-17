@@ -9,7 +9,7 @@ def cmd (command):
 		p = subprocess.Popen (command, stderr=tempf)
 
 		try:
-			p.wait ()
+			p.wait (timeout=int (os.getenv ("HB_TEST_SUBSET_FUZZER_TIMEOUT", "12")))
 			tempf.seek (0)
 			text = tempf.read ()
 
