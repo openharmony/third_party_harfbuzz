@@ -84,7 +84,7 @@ struct hb_ft_font_t
   bool symbol; /* Whether selected cmap is symbol cmap. */
   bool unref; /* Whether to destroy ft_face when done. */
 
-  mutable int cached_x_scale;
+  mutable hb_atomic_int_t cached_x_scale;
   mutable hb_advance_cache_t advance_cache;
 };
 
@@ -101,7 +101,7 @@ _hb_ft_font_create (FT_Face ft_face, bool symbol, bool unref)
 
   ft_font->load_flags = FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING;
 
-  ft_font->cached_x_scale = 0;
+  ft_font->cached_x_scale.set_relaxed (0);
   ft_font->advance_cache.init ();
 
   return ft_font;
@@ -179,13 +179,13 @@ hb_ft_font_get_load_flags (hb_font_t *font)
 }
 
 /**
- * hb_ft_font_get_face:
+ * hb_ft_get_face:
  * @font: #hb_font_t to work upon
  *
  * Fetches the FT_Face associated with the specified #hb_font_t
  * font object.
  *
- * Return value: (nullable): the FT_Face found or %NULL
+ * Return value: the FT_Face found
  *
  * Since: 0.9.2
  **/
@@ -202,12 +202,11 @@ hb_ft_font_get_face (hb_font_t *font)
 
 /**
  * hb_ft_font_lock_face:
- * @font: #hb_font_t to work upon
+ * @font:
  *
- * Gets the FT_Face associated with @font, This face will be kept around until
- * you call hb_ft_font_unlock_face().
  *
- * Return value: (nullable): the FT_Face associated with @font or %NULL
+ *
+ * Return value:
  * Since: 2.6.5
  **/
 FT_Face
@@ -225,10 +224,11 @@ hb_ft_font_lock_face (hb_font_t *font)
 
 /**
  * hb_ft_font_unlock_face:
- * @font: #hb_font_t to work upon
+ * @font:
  *
- * Releases an FT_Face previously obtained with hb_ft_font_lock_face().
  *
+ *
+ * Return value:
  * Since: 2.6.5
  **/
 void
@@ -335,10 +335,10 @@ hb_ft_get_glyph_h_advances (hb_font_t* font, void* font_data,
   int load_flags = ft_font->load_flags;
   int mult = font->x_scale < 0 ? -1 : +1;
 
-  if (font->x_scale != ft_font->cached_x_scale)
+  if (font->x_scale != ft_font->cached_x_scale.get ())
   {
     ft_font->advance_cache.clear ();
-    ft_font->cached_x_scale = font->x_scale;
+    ft_font->cached_x_scale.set (font->x_scale);
   }
 
   for (unsigned int i = 0; i < count; i++)
@@ -661,7 +661,7 @@ _hb_ft_reference_table (hb_face_t *face HB_UNUSED, hb_tag_t tag, void *user_data
 /**
  * hb_ft_face_create:
  * @ft_face: (destroy destroy) (scope notified): FT_Face to work upon
- * @destroy: (nullable): A callback to call when the face object is not needed anymore
+ * @destroy: A callback to call when the face object is not needed anymore
  *
  * Creates an #hb_face_t face object from the specified FT_Face.
  *
@@ -771,13 +771,13 @@ hb_ft_face_create_cached (FT_Face ft_face)
 /**
  * hb_ft_font_create:
  * @ft_face: (destroy destroy) (scope notified): FT_Face to work upon
- * @destroy: (nullable): A callback to call when the font object is not needed anymore
+ * @destroy: (optional): A callback to call when the font object is not needed anymore
  *
  * Creates an #hb_font_t font object from the specified FT_Face.
  *
  * <note>Note: You must set the face size on @ft_face before calling
- * hb_ft_font_create() on it. HarfBuzz assumes size is always set and will
- * access `size` member of FT_Face unconditionally.</note>
+ * hb_ft_font_create() on it. Otherwise, HarfBuzz will not pick up
+ * the face size.</note>
  *
  * This variant of the function does not provide any life-cycle management.
  *
@@ -814,7 +814,7 @@ hb_ft_font_create (FT_Face           ft_face,
 }
 
 /**
- * hb_ft_font_changed:
+ * hb_ft_font_has_changed:
  * @font: #hb_font_t to work upon
  *
  * Refreshes the state of @font when the underlying FT_Face has changed.
@@ -884,8 +884,8 @@ hb_ft_font_changed (hb_font_t *font)
  * Creates an #hb_font_t font object from the specified FT_Face.
  *
  * <note>Note: You must set the face size on @ft_face before calling
- * hb_ft_font_create_referenced() on it. HarfBuzz assumes size is always set
- * and will access `size` member of FT_Face unconditionally.</note>
+ * hb_ft_font_create_references() on it. Otherwise, HarfBuzz will not pick up
+ * the face size.</note>
  *
  * This is the preferred variant of the hb_ft_font_create*
  * function family, because it calls FT_Reference_Face() on @ft_face,

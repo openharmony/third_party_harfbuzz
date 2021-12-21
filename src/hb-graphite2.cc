@@ -195,11 +195,6 @@ _hb_graphite2_shaper_font_data_destroy (hb_graphite2_font_data_t *data HB_UNUSED
 #ifndef HB_DISABLE_DEPRECATED
 /**
  * hb_graphite2_font_get_gr_font:
- * @font: An #hb_font_t
- *
- * Always returns %NULL. Use hb_graphite2_face_get_gr_face() instead.
- *
- * Return value: (nullable): Graphite2 font associated with @font.
  *
  * Since: 0.9.10
  * Deprecated: 1.4.2
@@ -289,7 +284,7 @@ _hb_graphite2_shape (hb_shape_plan_t    *shape_plan HB_UNUSED,
     return true;
   }
 
-  (void) buffer->ensure (glyph_count);
+  buffer->ensure (glyph_count);
   scratch = buffer->get_scratch_buffer (&scratch_size);
   while ((DIV_CEIL (sizeof (hb_graphite2_cluster_t) * buffer->len, sizeof (*scratch)) +
 	  DIV_CEIL (sizeof (hb_codepoint_t) * glyph_count, sizeof (*scratch))) > scratch_size)

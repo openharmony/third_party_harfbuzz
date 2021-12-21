@@ -200,7 +200,7 @@ num = 0
 offset = 0
 starts = []
 ends = []
-print ("static const uint16_t indic_table[] = {")
+print ("static const INDIC_TABLE_ELEMENT_TYPE indic_table[] = {")
 for u in uu:
 	if u <= last:
 		continue
@@ -234,7 +234,7 @@ occupancy = used * 100. / total
 page_bits = 12
 print ("}; /* Table items: %d; occupancy: %d%% */" % (offset, occupancy))
 print ()
-print ("uint16_t")
+print ("INDIC_TABLE_ELEMENT_TYPE")
 print ("hb_indic_get_categories (hb_codepoint_t u)")
 print ("{")
 print ("  switch (u >> %d)" % page_bits)
