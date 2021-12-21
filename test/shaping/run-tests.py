@@ -67,18 +67,17 @@ for filename in args:
 			if os.name == 'nt': # Skip on Windows
 				continue
 
-			fontfile, expected_hash = (fontfile.split('@') + [''])[:2]
+			fontfile, expected_hash = fontfile.split('@')
 
 			try:
 				with open (fontfile, 'rb') as ff:
-					if expected_hash:
-						actual_hash = hashlib.sha1 (ff.read()).hexdigest ().strip ()
-						if actual_hash != expected_hash:
-							print ('different version of %s found; Expected hash %s, got %s; skipping.' %
-								   (fontfile, expected_hash, actual_hash))
-							skips += 1
-							continue
-			except IOError:
+					actual_hash = hashlib.sha1 (ff.read()).hexdigest ().strip ()
+					if actual_hash != expected_hash:
+						print ('different version of %s found; Expected hash %s, got %s; skipping.' %
+							   (fontfile, expected_hash, actual_hash))
+						skips += 1
+						continue
+			except:
 				print ('%s not found, skip.' % fontfile)
 				skips += 1
 				continue
@@ -97,7 +96,7 @@ for filename in args:
 
 		if not reference:
 			print ('%s "%s" %s %s --unicodes %s' %
-					 (hb_shape, fontfile, ' '.join(extra_options), ' '.join(options), unicodes))
+					 (hb_shape, fontfile, ' '.join(extra_options), options, unicodes))
 
 		if "--font-funcs=ft" in options and not have_freetype:
 			skips += 1

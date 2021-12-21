@@ -95,7 +95,7 @@ struct CmapSubtableFormat4
     HBUINT16 *endCode = c->start_embed<HBUINT16> ();
     hb_codepoint_t prev_endcp = 0xFFFF;
 
-    for (const auto& _ : +it)
+    for (const hb_item_type<Iterator> _ : +it)
     {
       if (prev_endcp != 0xFFFF && prev_endcp + 1u != _.first)
       {
@@ -131,7 +131,7 @@ struct CmapSubtableFormat4
     HBUINT16 *startCode = c->start_embed<HBUINT16> ();
     hb_codepoint_t prev_cp = 0xFFFF;
 
-    for (const auto& _ : +it)
+    for (const hb_item_type<Iterator> _ : +it)
     {
       if (prev_cp == 0xFFFF || prev_cp + 1u != _.first)
       {
@@ -170,7 +170,7 @@ struct CmapSubtableFormat4
     if ((char *)idDelta - (char *)startCode != (int) segcount * (int) HBINT16::static_size)
       return nullptr;
 
-    for (const auto& _ : +it)
+    for (const hb_item_type<Iterator> _ : +it)
     {
       if (_.first == startCode[i])
       {
@@ -276,9 +276,7 @@ struct CmapSubtableFormat4
     HBUINT16 *idRangeOffset = serialize_rangeoffset_glyid (c, format4_iter, endCode, startCode, idDelta, segcount);
     if (unlikely (!c->check_success (idRangeOffset))) return;
 
-    if (unlikely (!c->check_assign(this->length,
-                                   c->length () - table_initpos,
-                                   HB_SERIALIZE_ERROR_INT_OVERFLOW))) return;
+    if (unlikely (!c->check_assign(this->length, c->length () - table_initpos))) return;
     this->segCountX2 = segcount * 2;
     this->entrySelector = hb_max (1u, hb_bit_storage (segcount)) - 1;
     this->searchRange = 2 * (1u << this->entrySelector);
@@ -672,7 +670,7 @@ struct CmapSubtableLongSegmented
   HBUINT16	reserved;	/* Reserved; set to 0. */
   HBUINT32	length;		/* Byte length of this subtable. */
   HBUINT32	language;	/* Ignore. */
-  SortedArray32Of<CmapSubtableLongGroup>
+  SortedArrayOf<CmapSubtableLongGroup, HBUINT32>
 		groups;		/* Groupings. */
   public:
   DEFINE_SIZE_ARRAY (16, groups);
@@ -698,7 +696,7 @@ struct CmapSubtableFormat12 : CmapSubtableLongSegmented<CmapSubtableFormat12>
     hb_codepoint_t startCharCode = 0xFFFF, endCharCode = 0xFFFF;
     hb_codepoint_t glyphID = 0;
 
-    for (const auto& _ : +it)
+    for (const hb_item_type<Iterator> _ : +it)
     {
       if (startCharCode == 0xFFFF)
       {
@@ -786,7 +784,7 @@ struct UnicodeValueRange
   DEFINE_SIZE_STATIC (4);
 };
 
-struct DefaultUVS : SortedArray32Of<UnicodeValueRange>
+struct DefaultUVS : SortedArrayOf<UnicodeValueRange, HBUINT32>
 {
   void collect_unicodes (hb_set_t *out) const
   {
@@ -852,9 +850,7 @@ struct DefaultUVS : SortedArray32Of<UnicodeValueRange>
     }
     else
     {
-      if (unlikely (!c->check_assign (out->len,
-                                      (c->length () - init_len) / UnicodeValueRange::static_size,
-                                      HB_SERIALIZE_ERROR_INT_OVERFLOW))) return nullptr;
+      if (unlikely (!c->check_assign (out->len, (c->length () - init_len) / UnicodeValueRange::static_size))) return nullptr;
       return out;
     }
   }
@@ -880,21 +876,23 @@ struct UVSMapping
   DEFINE_SIZE_STATIC (5);
 };
 
-struct NonDefaultUVS : SortedArray32Of<UVSMapping>
+struct NonDefaultUVS : SortedArrayOf<UVSMapping, HBUINT32>
 {
   void collect_unicodes (hb_set_t *out) const
   {
-    for (const auto& a : as_array ())
-      out->add (a.unicodeValue);
+    unsigned int count = len;
+    for (unsigned int i = 0; i < count; i++)
+      out->add (arrayZ[i].unicodeValue);
   }
 
   void collect_mapping (hb_set_t *unicodes, /* OUT */
 			hb_map_t *mapping /* OUT */) const
   {
-    for (const auto& a : as_array ())
+    unsigned count = len;
+    for (unsigned i = 0; i < count; i++)
     {
-      hb_codepoint_t unicode = a.unicodeValue;
-      hb_codepoint_t glyphid = a.glyphID;
+      hb_codepoint_t unicode = arrayZ[i].unicodeValue;
+      hb_codepoint_t glyphid = arrayZ[i].glyphID;
       unicodes->add (unicode);
       mapping->set (unicode, glyphid);
     }
@@ -1043,9 +1041,9 @@ struct VariationSelectorRecord
   }
 
   HBUINT24	varSelector;	/* Variation selector. */
-  Offset32To<DefaultUVS>
+  LOffsetTo<DefaultUVS>
 		defaultUVS;	/* Offset to Default UVS Table.  May be 0. */
-  Offset32To<NonDefaultUVS>
+  LOffsetTo<NonDefaultUVS>
 		nonDefaultUVS;	/* Offset to Non-Default UVS Table.  May be 0. */
   public:
   DEFINE_SIZE_STATIC (11);
@@ -1060,8 +1058,9 @@ struct CmapSubtableFormat14
 
   void collect_variation_selectors (hb_set_t *out) const
   {
-    for (const auto& a : record.as_array ())
-      out->add (a.varSelector);
+    unsigned int count = record.len;
+    for (unsigned int i = 0; i < count; i++)
+      out->add (record.arrayZ[i].varSelector);
   }
   void collect_variation_unicodes (hb_codepoint_t variation_selector,
 				   hb_set_t *out) const
@@ -1113,12 +1112,10 @@ struct CmapSubtableFormat14
       return;
 
     int tail_len = init_tail - c->tail;
-    c->check_assign (this->length, c->length () - table_initpos + tail_len,
-                     HB_SERIALIZE_ERROR_INT_OVERFLOW);
+    c->check_assign (this->length, c->length () - table_initpos + tail_len);
     c->check_assign (this->record.len,
 		     (c->length () - table_initpos - CmapSubtableFormat14::min_size) /
-		     VariationSelectorRecord::static_size,
-                     HB_SERIALIZE_ERROR_INT_OVERFLOW);
+		     VariationSelectorRecord::static_size);
 
     /* Correct the incorrect write order by reversing the order of the variation
        records array. */
@@ -1183,7 +1180,7 @@ struct CmapSubtableFormat14
   protected:
   HBUINT16	format;		/* Format number is set to 14. */
   HBUINT32	length;		/* Byte length of this subtable. */
-  SortedArray32Of<VariationSelectorRecord>
+  SortedArrayOf<VariationSelectorRecord, HBUINT32>
 		record;		/* Variation selector records; sorted
 				 * in increasing order of `varSelector'. */
   public:
@@ -1341,7 +1338,7 @@ struct EncodingRecord
 
   HBUINT16	platformID;	/* Platform ID. */
   HBUINT16	encodingID;	/* Platform-specific encoding ID. */
-  Offset32To<CmapSubtable>
+  LOffsetTo<CmapSubtable>
 		subtable;	/* Byte offset from beginning of table to the subtable for this encoding. */
   public:
   DEFINE_SIZE_STATIC (8);
@@ -1404,9 +1401,7 @@ struct cmap
       }
     }
 
-    c->check_assign(this->encodingRecord.len,
-                    (c->length () - cmap::min_size)/EncodingRecord::static_size,
-                    HB_SERIALIZE_ERROR_INT_OVERFLOW);
+    c->check_assign(this->encodingRecord.len, (c->length () - cmap::min_size)/EncodingRecord::static_size);
   }
 
   void closure_glyphs (const hb_set_t      *unicodes,
@@ -1702,7 +1697,7 @@ struct cmap
 
   protected:
   HBUINT16	version;	/* Table version number (0). */
-  SortedArray16Of<EncodingRecord>
+  SortedArrayOf<EncodingRecord>
 		encodingRecord;	/* Encoding tables. */
   public:
   DEFINE_SIZE_ARRAY (4, encodingRecord);
