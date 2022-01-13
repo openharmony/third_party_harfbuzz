@@ -1,0 +1,39 @@
+{
+    "name": "@ohos/harfbuzz",
+    "version": "",
+    "description": "Third-party open-source software harfbuzz | 三方开源软件harfbuzz",
+    "homePage": "https://gitee.com/openharmony",
+    "license": "MIT",
+    "repository": "https://gitee.com/openharmony/third_party_harfbuzz",
+    "domain": "os",
+    "language": "",
+    "publishAs": "code-segment",
+    "private": false,
+    "scripts": {},
+    "tags": [
+        "third_party"
+    ],
+    "keywords": [
+        "third-party",
+        "harfbuzz"
+    ],
+    "envs": [],
+    "dirs": [],
+    "segment": {
+        "destPath": "third_party/harfbuzz"
+    },
+    "component": {
+        "name": "thirdparty_harfbuzz",
+        "subsystem": "",
+        "syscap": [],
+        "features": [],
+        "adapted_system_type": [],
+        "rom": "",
+        "ram": "",
+        "build": {
+            "sub_component": [],
+            "inner_kits": [],
+            "test": []
+        }
+    }
+}
