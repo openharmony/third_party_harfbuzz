@@ -62,11 +62,11 @@ struct TrackTableEntry
   }
 
   protected:
-  Fixed		track;		/* Track value for this record. */
+  HBFixed	track;		/* Track value for this record. */
   NameID	trackNameID;	/* The 'name' table index for this track.
 				 * (a short word or phrase like "loose"
 				 * or "very tight") */
-  NNOffsetTo<UnsizedArrayOf<FWORD>>
+  NNOffset16To<UnsizedArrayOf<FWORD>>
 		valuesZ;	/* Offset from start of tracking table to
 				 * per-size tracking values for this track. */
 
@@ -82,7 +82,7 @@ struct TrackData
 			const void *base) const
   {
     unsigned int sizes = nSizes;
-    hb_array_t<const Fixed> size_table ((base+sizeTable).arrayZ, sizes);
+    hb_array_t<const HBFixed> size_table ((base+sizeTable).arrayZ, sizes);
 
     float s0 = size_table[idx].to_float ();
     float s1 = size_table[idx + 1].to_float ();
@@ -120,11 +120,11 @@ struct TrackData
     if (!sizes) return 0.;
     if (sizes == 1) return trackTableEntry->get_value (base, 0, sizes);
 
-    hb_array_t<const Fixed> size_table ((base+sizeTable).arrayZ, sizes);
+    hb_array_t<const HBFixed> size_table ((base+sizeTable).arrayZ, sizes);
     unsigned int size_index;
     for (size_index = 0; size_index < sizes - 1; size_index++)
       if (size_table[size_index].to_float () >= ptem)
-        break;
+	break;
 
     return roundf (interpolate_at (size_index ? size_index - 1 : 0, ptem,
 				   *trackTableEntry, base));
@@ -141,7 +141,7 @@ struct TrackData
   protected:
   HBUINT16	nTracks;	/* Number of separate tracks included in this table. */
   HBUINT16	nSizes;		/* Number of point sizes included in this table. */
-  LOffsetTo<UnsizedArrayOf<Fixed>, false>
+  NNOffset32To<UnsizedArrayOf<HBFixed>>
 		sizeTable;	/* Offset from start of the tracking table to
 				 * Array[nSizes] of size values.. */
   UnsizedArrayOf<TrackTableEntry>
@@ -176,7 +176,7 @@ struct trak
       hb_position_t advance_to_add = c->font->em_scalef_x (tracking);
       foreach_grapheme (buffer, start, end)
       {
-        if (!(buffer->info[start].mask & trak_mask)) continue;
+	if (!(buffer->info[start].mask & trak_mask)) continue;
 	buffer->pos[start].x_advance += advance_to_add;
 	buffer->pos[start].x_offset += offset_to_add;
       }
@@ -189,7 +189,7 @@ struct trak
       hb_position_t advance_to_add = c->font->em_scalef_y (tracking);
       foreach_grapheme (buffer, start, end)
       {
-        if (!(buffer->info[start].mask & trak_mask)) continue;
+	if (!(buffer->info[start].mask & trak_mask)) continue;
 	buffer->pos[start].y_advance += advance_to_add;
 	buffer->pos[start].y_offset += offset_to_add;
       }
@@ -210,12 +210,12 @@ struct trak
 
   protected:
   FixedVersion<>version;	/* Version of the tracking table
-					 * (0x00010000u for version 1.0). */
-  HBUINT16	format; 	/* Format of the tracking table (set to 0). */
-  OffsetTo<TrackData>
+				 * (0x00010000u for version 1.0). */
+  HBUINT16	format;		/* Format of the tracking table (set to 0). */
+  Offset16To<TrackData>
 		horizData;	/* Offset from start of tracking table to TrackData
 				 * for horizontal text (or 0 if none). */
-  OffsetTo<TrackData>
+  Offset16To<TrackData>
 		vertData;	/* Offset from start of tracking table to TrackData
 				 * for vertical text (or 0 if none). */
   HBUINT16	reserved;	/* Reserved. Set to 0. */

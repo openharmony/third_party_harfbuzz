@@ -1,12 +1,17 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
-from __future__ import print_function, division, absolute_import
+"""usage: ./gen-indic-table.py IndicSyllabicCategory.txt IndicPositionalCategory.txt Blocks.txt
 
-import io, sys
+Input files:
+* https://unicode.org/Public/UCD/latest/ucd/IndicSyllabicCategory.txt
+* https://unicode.org/Public/UCD/latest/ucd/IndicPositionalCategory.txt
+* https://unicode.org/Public/UCD/latest/ucd/Blocks.txt
+"""
+
+import sys
 
 if len (sys.argv) != 4:
-	print ("usage: ./gen-indic-table.py IndicSyllabicCategory.txt IndicPositionalCategory.txt Blocks.txt", file=sys.stderr)
-	sys.exit (1)
+	sys.exit (__doc__)
 
 ALLOWED_SINGLES = [0x00A0, 0x25CC]
 ALLOWED_BLOCKS = [
@@ -32,12 +37,12 @@ ALLOWED_BLOCKS = [
 	'Myanmar Extended-A',
 ]
 
-files = [io.open (x, encoding='utf-8') for x in sys.argv[1:]]
+files = [open (x, encoding='utf-8') for x in sys.argv[1:]]
 
 headers = [[f.readline () for i in range (2)] for f in files]
 
-data = [{} for f in files]
-values = [{} for f in files]
+data = [{} for _ in files]
+values = [{} for _ in files]
 for i, f in enumerate (files):
 	for line in f:
 
@@ -77,7 +82,6 @@ for i,d in enumerate (data):
 combined = {k:v for k,v in combined.items() if k in ALLOWED_SINGLES or v[2] in ALLOWED_BLOCKS}
 data = combined
 del combined
-num = len (data)
 
 # Move the outliers NO-BREAK SPACE and DOTTED CIRCLE out
 singles = {}
@@ -133,8 +137,8 @@ what = ["INDIC_SYLLABIC_CATEGORY", "INDIC_MATRA_CATEGORY"]
 what_short = ["ISC", "IMC"]
 print ('#pragma GCC diagnostic push')
 print ('#pragma GCC diagnostic ignored "-Wunused-macros"')
+cat_defs = []
 for i in range (2):
-	print ()
 	vv = sorted (values[i].keys ())
 	for v in vv:
 		v_no_and = v.replace ('_And_', '_')
@@ -146,10 +150,17 @@ for i in range (2):
 				raise Exception ("Duplicate short value alias", v, all_shorts[i][s])
 			all_shorts[i][s] = v
 			short[i][v] = s
-		print ("#define %s_%s	%s_%s	%s/* %3d chars; %s */" %
-			(what_short[i], s, what[i], v.upper (),
-			'	'* ((48-1 - len (what[i]) - 1 - len (v)) // 8),
-			values[i][v], v))
+		cat_defs.append ((what_short[i] + '_' + s, what[i] + '_' + v.upper (), str (values[i][v]), v))
+
+maxlen_s = max ([len (c[0]) for c in cat_defs])
+maxlen_l = max ([len (c[1]) for c in cat_defs])
+maxlen_n = max ([len (c[2]) for c in cat_defs])
+for s in what_short:
+	print ()
+	for c in [c for c in cat_defs if s in c[0]]:
+		print ("#define %s %s /* %s chars; %s */" %
+			(c[0].ljust (maxlen_s), c[1].ljust (maxlen_l), c[2].rjust (maxlen_n), c[3]))
+print ()
 print ('#pragma GCC diagnostic pop')
 print ()
 print ("#define _(S,M) INDIC_COMBINE_CATEGORIES (ISC_##S, IMC_##M)")
@@ -189,7 +200,7 @@ num = 0
 offset = 0
 starts = []
 ends = []
-print ("static const INDIC_TABLE_ELEMENT_TYPE indic_table[] = {")
+print ("static const uint16_t indic_table[] = {")
 for u in uu:
 	if u <= last:
 		continue
@@ -204,7 +215,6 @@ for u in uu:
 	if start != last + 1:
 		if start - last <= 1+16*3:
 			print_block (None, last+1, start-1, data)
-			last = start-1
 		else:
 			if last >= 0:
 				ends.append (last + 1)
@@ -224,7 +234,7 @@ occupancy = used * 100. / total
 page_bits = 12
 print ("}; /* Table items: %d; occupancy: %d%% */" % (offset, occupancy))
 print ()
-print ("INDIC_TABLE_ELEMENT_TYPE")
+print ("uint16_t")
 print ("hb_indic_get_categories (hb_codepoint_t u)")
 print ("{")
 print ("  switch (u >> %d)" % page_bits)
@@ -249,14 +259,14 @@ print ("}")
 print ()
 print ("#undef _")
 for i in range (2):
-	print
+	print ()
 	vv = sorted (values[i].keys ())
 	for v in vv:
 		print ("#undef %s_%s" %
 			(what_short[i], short[i][v]))
 print ()
-print ()
 print ('#endif')
+print ()
 print ("/* == End of generated table == */")
 
 # Maintain at least 30% occupancy in the table */
