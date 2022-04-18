@@ -1,27 +1,15 @@
 {
     "name": "@ohos/harfbuzz",
-    "version": "",
-    "description": "Third-party open-source software harfbuzz | 三方开源软件harfbuzz",
-    "homePage": "https://gitee.com/openharmony",
+    "description": "HarfBuzz is a text shaping engine. It primarily supports OpenType, but also Apple Advanced Typography. HarfBuzz is used in Android, Chrome, ChromeOS, Firefox, GNOME, GTK+, KDE, LibreOffice, OpenJDK, PlayStation, Qt, XeTeX, and other places.",
+    "version": "3.1",
     "license": "MIT",
-    "repository": "https://gitee.com/openharmony/third_party_harfbuzz",
-    "domain": "os",
-    "language": "",
     "publishAs": "code-segment",
-    "private": false,
-    "scripts": {},
-    "tags": [
-        "third_party"
-    ],
-    "keywords": [
-        "third-party",
-        "harfbuzz"
-    ],
-    "envs": [],
-    "dirs": [],
     "segment": {
         "destPath": "third_party/harfbuzz"
     },
+    "dirs": {},
+    "scripts": {},
+    "licensePath": "COPYING",
     "component": {
         "name": "thirdparty_harfbuzz",
         "subsystem": "",
@@ -30,6 +18,10 @@
         "adapted_system_type": [],
         "rom": "",
         "ram": "",
+        "deps": {
+            "components": [],
+            "third_party": []
+        },
         "build": {
             "sub_component": [],
             "inner_kits": [],
