@@ -69,6 +69,8 @@ harfbuzz_source = [
 
 if (defined(ohos_lite)) {
   lite_library("harfbuzz") {
+    output_dir = "${root_out_dir}/thirdparty/harfbuzz"
+    output_name = "harfbuzz"
     target_type = "shared_library"
     sources = harfbuzz_source
     defines = [ "HAVE_PTHREAD = 1" ]
@@ -76,6 +78,8 @@ if (defined(ohos_lite)) {
   }
 } else {
   ohos_static_library("harfbuzz_static") {
+    output_dir = "${root_out_dir}/thirdparty/harfbuzz"
+    output_name = "harfbuzz"
     sources = harfbuzz_source
     include_dirs = [ "src\base" ]
     defines = [ "HAVE_PTHREAD = 1" ]
