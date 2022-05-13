@@ -11,11 +11,11 @@
     "scripts": {},
     "licensePath": "COPYING",
     "component": {
-        "name": "thirdparty_harfbuzz",
-        "subsystem": "",
+        "name": "harfbuzz",
+        "subsystem": "thirdparty",
         "syscap": [],
         "features": [],
-        "adapted_system_type": [],
+        "adapted_system_type": [ "standard"],
         "rom": "",
         "ram": "",
         "deps": {
@@ -23,7 +23,9 @@
             "third_party": []
         },
         "build": {
-            "sub_component": [],
+            "sub_component": [
+                "//third_party/harfbuzz:harfbuzz_static"
+            ],
             "inner_kits": [],
             "test": []
         }
