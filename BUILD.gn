@@ -15,6 +15,13 @@ if (defined(ohos_lite)) {
 }
 config("harfbuzz_config") {
   include_dirs = [ "//third_party/harfbuzz/src" ]
+  if (board_toolchain_type == "iccarm") {
+    cflags = [
+      "--diag_suppress",
+      "Pa068,Pa093,Pe111,Pa181,Pe128,Pe161,Pe177,Pe185,Pe186,Pe550,Pe554",
+    ]
+    cflags_cc = cflags
+  }
 }
 
 harfbuzz_source = [
