@@ -81,6 +81,13 @@ if (defined(ohos_lite)) {
     target_type = "shared_library"
     sources = harfbuzz_source
     defines = [ "HAVE_PTHREAD = 1" ]
+    if (board_toolchain_type == "iccarm") {
+      cflags = [
+        "--diag_suppress",
+        "Pa068,Pa093,Pe111,Pa181,Pe128,Pe161,Pe177,Pe185,Pe186,Pe550,Pe554",
+      ]
+      cflags_cc = cflags
+    }
     public_configs = [ ":harfbuzz_config" ]
   }
 } else {
