@@ -562,8 +562,13 @@ struct SortedUnsizedArrayOf : UnsizedArrayOf<Type>
   { return hb_sorted_array (this->arrayZ, len); }
   hb_sorted_array_t<const Type> as_array (unsigned int len) const
   { return hb_sorted_array (this->arrayZ, len); }
+#ifdef ENABLE_ICCARM
+  operator hb_sorted_array_t<Type> ()             { return as_array (0); }
+  operator hb_sorted_array_t<const Type> () const { return as_array (0); }
+#else
   operator hb_sorted_array_t<Type> ()             { return as_array (); }
   operator hb_sorted_array_t<const Type> () const { return as_array (); }
+#endif
 
   template <typename T>
   Type &bsearch (unsigned int len, const T &x, Type &not_found = Crap (Type))
