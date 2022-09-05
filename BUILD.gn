@@ -71,16 +71,23 @@ if (defined(ohos_lite)) {
   lite_library("harfbuzz") {
     output_dir = "${root_out_dir}/thirdparty/harfbuzz"
     output_name = "harfbuzz"
-    target_type = "shared_library"
     sources = harfbuzz_source
-    defines = [ "HAVE_PTHREAD = 1" ]
     public_configs = [ ":harfbuzz_config" ]
     if (board_toolchain_type == "iccarm") {
+      target_type = "static_library"
+      defines = [
+        "HAVE_PTHREAD=1",
+        "ENABLE_ICCARM=1",
+        "HB_CUSTOM_MALLOC",
+      ]
       cflags = [
         "--diag_suppress",
-        "Pa068,Pa093,Pe111,Pa181,Pe128,Pe161,Pe177,Pe185,Pe186,Pe550,Pe554",
+        "Pe068,Pa093,Pe111,Pa181,Pe128,Pe161,Pe177,Pe185,Pe186,Pe550,Pe554",
       ]
       cflags_cc = cflags
+    } else {
+      target_type = "shared_library"
+      defines = [ "HAVE_PTHREAD = 1" ]
     }
   }
 } else {
