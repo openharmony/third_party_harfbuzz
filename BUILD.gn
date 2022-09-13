@@ -73,7 +73,7 @@ if (defined(ohos_lite)) {
     output_name = "harfbuzz"
     sources = harfbuzz_source
     public_configs = [ ":harfbuzz_config" ]
-    if (board_toolchain_type == "iccarm") {
+    if (defined(board_toolchain_type) && board_toolchain_type == "iccarm") {
       target_type = "static_library"
       defines = [
         "HAVE_PTHREAD=1",
