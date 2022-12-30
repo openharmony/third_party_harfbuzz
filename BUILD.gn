@@ -75,7 +75,7 @@ if (defined(ohos_lite)) {
     if (defined(board_toolchain_type) && board_toolchain_type == "iccarm") {
       target_type = "static_library"
       defines = [
-        "HAVE_PTHREAD=1",
+        "HB_TINY",
         "ENABLE_ICCARM=1",
         "HB_CUSTOM_MALLOC",
       ]
