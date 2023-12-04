@@ -14,63 +14,77 @@ if (defined(ohos_lite)) {
   import("//build/ohos.gni")
 }
 config("harfbuzz_config") {
-  include_dirs = [ "//third_party/harfbuzz/src" ]
+  include_dirs = [ "${target_gen_dir}/harfbuzz-2.8.2/src" ]
 }
 
-harfbuzz_source = [
-  "//third_party/harfbuzz/src/hb-aat-layout.cc",
-  "//third_party/harfbuzz/src/hb-aat-map.cc",
-  "//third_party/harfbuzz/src/hb-blob.cc",
-  "//third_party/harfbuzz/src/hb-buffer-serialize.cc",
-  "//third_party/harfbuzz/src/hb-buffer.cc",
-  "//third_party/harfbuzz/src/hb-common.cc",
-  "//third_party/harfbuzz/src/hb-face.cc",
-  "//third_party/harfbuzz/src/hb-fallback-shape.cc",
-  "//third_party/harfbuzz/src/hb-font.cc",
-  "//third_party/harfbuzz/src/hb-map.cc",
-  "//third_party/harfbuzz/src/hb-number.cc",
-  "//third_party/harfbuzz/src/hb-ot-cff1-table.cc",
-  "//third_party/harfbuzz/src/hb-ot-cff2-table.cc",
-  "//third_party/harfbuzz/src/hb-ot-face.cc",
-  "//third_party/harfbuzz/src/hb-ot-font.cc",
-  "//third_party/harfbuzz/src/hb-ot-layout.cc",
-  "//third_party/harfbuzz/src/hb-ot-map.cc",
-  "//third_party/harfbuzz/src/hb-ot-math.cc",
-  "//third_party/harfbuzz/src/hb-ot-meta.cc",
-  "//third_party/harfbuzz/src/hb-ot-metrics.cc",
-  "//third_party/harfbuzz/src/hb-ot-name.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-arabic.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-default.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-hangul.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-hebrew.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-indic-table.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-indic.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-khmer.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-myanmar.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-syllabic.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-thai.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-use.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-complex-vowel-constraints.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-fallback.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape-normalize.cc",
-  "//third_party/harfbuzz/src/hb-ot-shape.cc",
-  "//third_party/harfbuzz/src/hb-ot-tag.cc",
-  "//third_party/harfbuzz/src/hb-ot-var.cc",
-  "//third_party/harfbuzz/src/hb-set.cc",
-  "//third_party/harfbuzz/src/hb-shape-plan.cc",
-  "//third_party/harfbuzz/src/hb-shape.cc",
-  "//third_party/harfbuzz/src/hb-shaper.cc",
-  "//third_party/harfbuzz/src/hb-static.cc",
-  "//third_party/harfbuzz/src/hb-subset-cff2.cc",
-  "//third_party/harfbuzz/src/hb-subset-cff-common.cc",
-  "//third_party/harfbuzz/src/hb-ucd.cc",
-  "//third_party/harfbuzz/src/hb-unicode.cc",
-]
+action("harfbuzz_action") {
+  script = "//third_party/harfbuzz/install.py"
+  outputs = [
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-aat-layout.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-aat-map.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-blob.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-buffer-serialize.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-buffer.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-common.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-face.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-fallback-shape.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-font.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-map.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-number.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-cff1-table.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-cff2-table.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-face.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-font.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-layout.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-map.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-math.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-meta.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-metrics.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-name.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-arabic.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-default.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-hangul.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-hebrew.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-indic-table.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-indic.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-khmer.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-myanmar.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-syllabic.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-thai.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-use.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-complex-vowel-constraints.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-fallback.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape-normalize.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-shape.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-tag.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ot-var.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-set.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-shape-plan.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-shape.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-shaper.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-static.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-subset-cff2.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-subset-cff-common.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-ucd.cc",
+    "${target_gen_dir}/harfbuzz-2.8.2/src/hb-unicode.cc",
+  ]
+
+  inputs = [ "//third_party/harfbuzz/harfbuzz-2.8.2.tar.xz" ]
+  harfbuzz_path = rebase_path("${target_gen_dir}", root_build_dir)
+  harfbuzz_source_path = rebase_path("//third_party/harfbuzz", root_build_dir)
+  args = [
+    "--gen-dir",
+    "$harfbuzz_path",
+    "--source-dir",
+    "$harfbuzz_source_path",
+  ]
+}
 
 if (defined(ohos_lite)) {
   lite_library("harfbuzz") {
     output_name = "harfbuzz"
-    sources = harfbuzz_source
+    sources = get_target_outputs(":harfbuzz_action")
+    deps = [ ":harfbuzz_action" ]
     public_configs = [ ":harfbuzz_config" ]
     if (defined(board_toolchain_type) && board_toolchain_type == "iccarm") {
       target_type = "static_library"
@@ -91,11 +105,12 @@ if (defined(ohos_lite)) {
   }
 } else {
   ohos_static_library("harfbuzz_static") {
-    output_dir = "${root_out_dir}/thirdparty/harfbuzz"
-    output_name = "harfbuzz"
-    sources = harfbuzz_source
-    include_dirs = [ "src\base" ]
+    sources = get_target_outputs(":harfbuzz_action")
+    deps = [ ":harfbuzz_action" ]
+    include_dirs = [ "${target_gen_dir}/harfbuzz-2.8.2/src" ]
     defines = [ "HAVE_PTHREAD = 1" ]
     public_configs = [ ":harfbuzz_config" ]
+    part_name = "harfbuzz"
+    subsystem_name = "thirdparty"
   }
 }
