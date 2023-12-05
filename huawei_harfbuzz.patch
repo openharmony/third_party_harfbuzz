@@ -1,7 +1,7 @@
-diff --git a/harfbuzz-2.8.2/src/hb-buffer.h b/harfbuzz-2.8.2/src/hb-buffer.h
+diff --git a/src/hb-buffer.h b/src/hb-buffer.h
 index 865ccb2..88f1f4c 100644
---- a/harfbuzz-2.8.2/src/hb-buffer.h
-+++ b/harfbuzz-2.8.2/src/hb-buffer.h
+--- a/src/hb-buffer.h
++++ b/src/hb-buffer.h
 @@ -307,7 +307,8 @@ typedef enum { /*< flags >*/
    HB_BUFFER_FLAG_EOT				= 0x00000002u, /* End-of-text */
    HB_BUFFER_FLAG_PRESERVE_DEFAULT_IGNORABLES	= 0x00000004u,
@@ -12,10 +12,10 @@ index 865ccb2..88f1f4c 100644
  } hb_buffer_flags_t;
  
  HB_EXTERN void
-diff --git a/harfbuzz-2.8.2/src/hb-open-type.hh b/harfbuzz-2.8.2/src/hb-open-type.hh
+diff --git a/src/hb-open-type.hh b/src/hb-open-type.hh
 index 406771f..b8ac4c5 100644
---- a/harfbuzz-2.8.2/src/hb-open-type.hh
-+++ b/harfbuzz-2.8.2/src/hb-open-type.hh
+--- a/src/hb-open-type.hh
++++ b/src/hb-open-type.hh
 @@ -575,8 +575,13 @@ struct SortedUnsizedArrayOf : UnsizedArrayOf<Type>
    { return hb_sorted_array (this->arrayZ, len); }
    hb_sorted_array_t<const Type> as_array (unsigned int len) const
@@ -30,27 +30,10 @@ index 406771f..b8ac4c5 100644
  
    template <typename T>
    Type &bsearch (unsigned int len, const T &x, Type &not_found = Crap (Type))
-diff --git a/harfbuzz-2.8.2/src/hb-ot-color-sbix-table.hh b/harfbuzz-2.8.2/src/hb-ot-color-sbix-table.hh
-index af1e4a5..e085ee0 100644
---- a/harfbuzz-2.8.2/src/hb-ot-color-sbix-table.hh
-+++ b/harfbuzz-2.8.2/src/hb-ot-color-sbix-table.hh
-@@ -298,6 +298,12 @@ struct sbix
- 
-       const PNGHeader &png = *blob->as<PNGHeader>();
- 
-+      if ((png.IHDR.height >= 65536) | (png.IHDR.width >= 65536))
-+      {
-+        hb_blob_destroy (blob);
-+        return false;
-+      }
-+
-       extents->x_bearing = x_offset;
-       extents->y_bearing = png.IHDR.height + y_offset;
-       extents->width     = png.IHDR.width;
-diff --git a/harfbuzz-2.8.2/src/hb-ot-layout-common.hh b/harfbuzz-2.8.2/src/hb-ot-layout-common.hh
+diff --git a/src/hb-ot-layout-common.hh b/src/hb-ot-layout-common.hh
 index c78f820..c9d93a7 100644
---- a/harfbuzz-2.8.2/src/hb-ot-layout-common.hh
-+++ b/harfbuzz-2.8.2/src/hb-ot-layout-common.hh
+--- a/src/hb-ot-layout-common.hh
++++ b/src/hb-ot-layout-common.hh
 @@ -445,6 +445,7 @@ struct RecordListOf : RecordArrayOf<Type>
    }
  };
@@ -433,10 +416,10 @@ index c78f820..c9d93a7 100644
  typedef RecordListOf<Feature> FeatureList;
  
  
-diff --git a/harfbuzz-2.8.2/src/hb-ot-layout-gsubgpos.hh b/harfbuzz-2.8.2/src/hb-ot-layout-gsubgpos.hh
+diff --git a/src/hb-ot-layout-gsubgpos.hh b/src/hb-ot-layout-gsubgpos.hh
 index c17bf92..f046c08 100644
---- a/harfbuzz-2.8.2/src/hb-ot-layout-gsubgpos.hh
-+++ b/harfbuzz-2.8.2/src/hb-ot-layout-gsubgpos.hh
+--- a/src/hb-ot-layout-gsubgpos.hh
++++ b/src/hb-ot-layout-gsubgpos.hh
 @@ -535,7 +535,17 @@ struct hb_ot_apply_context_t :
      bool prev ()
      {
@@ -456,10 +439,10 @@ index c17bf92..f046c08 100644
        {
  	idx--;
  	const hb_glyph_info_t &info = c->buffer->out_info[idx];
-diff --git a/harfbuzz-2.8.2/src/hb-static.cc b/harfbuzz-2.8.2/src/hb-static.cc
+diff --git a/src/hb-static.cc b/src/hb-static.cc
 index ec4b241..bef2ce9 100644
---- a/harfbuzz-2.8.2/src/hb-static.cc
-+++ b/harfbuzz-2.8.2/src/hb-static.cc
+--- a/src/hb-static.cc
++++ b/src/hb-static.cc
 @@ -39,8 +39,13 @@
  #ifndef HB_NO_VISIBILITY
  #include "hb-ot-name-language-static.hh"
