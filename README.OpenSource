@@ -1,6 +1,6 @@
 [
     {
-        "Name"                  : "harfbuzz",
+        "Name"                  : "openEuler:HarfBuzz",
         "License"               : "MIT License",
         "License File"          : "COPYING",
         "Version Number"        : "2.8.2-4.oe2203sp3",
