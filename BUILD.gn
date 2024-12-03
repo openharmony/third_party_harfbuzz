@@ -98,6 +98,23 @@ if (defined(ohos_lite)) {
         "Pe068,Pa093,Pe111,Pa181,Pe128,Pe161,Pe177,Pe185,Pe186,Pe550,Pe554",
       ]
       cflags_cc = cflags
+    } else if (defined(board_toolchain_type) &&
+               board_toolchain_type == "clang") {
+      target_type = "static_library"
+      defines = [
+        "HB_TINY",
+        "HB_CUSTOM_MALLOC",
+        "HB_NO_PRAGMA_GCC_DIAGNOSTIC_WARNING",
+        "HB_NO_PRAGMA_GCC_DIAGNOSTIC_ERROR",
+      ]
+      cflags = [
+        "-Wall",
+        "-Wno-error=unused-variable",
+        "-Wno-unused-variable",
+        "-Wno-error=extra-semi-stmt",
+        "-Wno-extra-semi-stmt",
+      ]
+      cflags_cc = cflags
     } else {
       target_type = "shared_library"
       defines = [ "HAVE_PTHREAD = 1" ]
