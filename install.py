@@ -32,9 +32,6 @@ def untar_file(tar_file_path, extract_path):
 
 def move_file(src_path, dst_path):
     files = [
-        "backport-CVE-2022-33068.patch",
-        "backport-0001-CVE-2023-25193.patch",
-        "backport-0002-CVE-2023-25193.patch",
         "huawei_harfbuzz.patch"
     ]
     for file in files:
@@ -56,9 +53,6 @@ def apply_patch(patch_file, target_dir):
 
 def do_patch(target_dir):
     patch_file = [
-        "backport-CVE-2022-33068.patch",
-        "backport-0001-CVE-2023-25193.patch",
-        "backport-0002-CVE-2023-25193.patch",
         "huawei_harfbuzz.patch"
     ]
 
@@ -71,8 +65,8 @@ def main():
     harfbuzz_path.add_argument('--gen-dir', help='generate path of log', required=True)
     harfbuzz_path.add_argument('--source-dir', help='generate path of log', required=True)
     args = harfbuzz_path.parse_args()
-    tar_file_path = os.path.join(args.source_dir, "harfbuzz-2.8.2.tar.xz")
-    target_dir = os.path.join(args.gen_dir, "harfbuzz-2.8.2")
+    tar_file_path = os.path.join(args.source_dir, "harfbuzz-11.0.0.tar.xz")
+    target_dir = os.path.join(args.gen_dir, "harfbuzz-11.0.0")
 
     untar_file(tar_file_path, args.gen_dir)
     move_file(args.source_dir, target_dir)
