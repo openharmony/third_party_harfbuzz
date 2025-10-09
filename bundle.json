@@ -30,7 +30,11 @@
             "sub_component": [
                 "//third_party/harfbuzz:harfbuzz_static"
             ],
-            "inner_kits": [],
+            "inner_kits": [
+                {
+                    "name": "//third_party/harfbuzz:harfbuzz_static"
+                }
+            ],
             "test": []
         }
     }
