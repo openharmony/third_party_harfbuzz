@@ -53,7 +53,8 @@ def apply_patch(patch_file, target_dir):
 
 def do_patch(target_dir):
     patch_file = [
-        "huawei_harfbuzz.patch"
+        "huawei_harfbuzz.patch",
+        "CVE-2026-22693.patch"
     ]
 
     for patch in patch_file:
