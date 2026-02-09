@@ -32,7 +32,8 @@ def untar_file(tar_file_path, extract_path):
 
 def move_file(src_path, dst_path):
     files = [
-        "huawei_harfbuzz.patch"
+        "huawei_harfbuzz.patch",
+        "CVE-2026-22693.patch"
     ]
     for file in files:
         src_file = os.path.join(src_path, file)
