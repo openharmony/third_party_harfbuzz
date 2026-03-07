@@ -33,7 +33,8 @@ def untar_file(tar_file_path, extract_path):
 def move_file(src_path, dst_path):
     files = [
         "huawei_harfbuzz.patch",
-        "CVE-2026-22693.patch"
+        "CVE-2026-22693.patch",
+        "backport-harfbuzz-disallow-during-callback.patch"
     ]
     for file in files:
         src_file = os.path.join(src_path, file)
@@ -55,7 +56,8 @@ def apply_patch(patch_file, target_dir):
 def do_patch(target_dir):
     patch_file = [
         "huawei_harfbuzz.patch",
-        "CVE-2026-22693.patch"
+        "CVE-2026-22693.patch",
+        "backport-harfbuzz-disallow-during-callback.patch"
     ]
 
     for patch in patch_file:
