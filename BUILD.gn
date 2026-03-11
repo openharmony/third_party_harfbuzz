@@ -68,6 +68,11 @@ action("harfbuzz_action") {
     "${target_gen_dir}/harfbuzz-11.0.0/src/hb-ucd.cc",
     "${target_gen_dir}/harfbuzz-11.0.0/src/hb-unicode.cc",
     "${target_gen_dir}/harfbuzz-11.0.0/src/hb-face-builder.cc",
+    "${target_gen_dir}/harfbuzz-11.0.0/src/hb-outline.cc",
+    "${target_gen_dir}/harfbuzz-11.0.0/src/hb-buffer-verify.cc",
+    "${target_gen_dir}/harfbuzz-11.0.0/src/hb-paint-extents.cc",
+    "${target_gen_dir}/harfbuzz-11.0.0/src/hb-paint.cc",
+    "${target_gen_dir}/harfbuzz-11.0.0/src/hb-draw.cc",
   ]
 
   inputs = [ "//third_party/harfbuzz/harfbuzz-11.0.0.tar.xz" ]
